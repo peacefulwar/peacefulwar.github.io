@@ -31,7 +31,7 @@ addLayer("light", {
     base: 1.75,
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1);
-        if (hasUpgrade("mem", 34)) mult = mult.div(upgradeEffect('mem', 34).times(1.6));
+        if (hasUpgrade("mem", 34)) mult = mult.div(upgradeEffect('mem', 34).times(1.6).max(1));
         if (hasUpgrade("light", 13)) mult = mult.div(upgradeEffect('light', 13));
         if (hasUpgrade("light", 14)) mult = mult.div(upgradeEffect('light', 14));
         if (hasUpgrade("dark", 24)) mult = mult.div(upgradeEffect('dark', 24));
@@ -213,7 +213,7 @@ addLayer("light", {
                 eff = player[this.layer].points.plus(1).log10().plus(1).pow(0.5);
                 return eff;
             },
-            cost() { return new Decimal(20) },
+            cost() { return new Decimal(21) },
         },
         21: { /*title: "Seeking Delight",
         description() {
@@ -230,7 +230,7 @@ addLayer("light", {
             onPurchase() {
                 //player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost);
             },
-            cost() { return new Decimal(22) },
+            cost() { return new Decimal(23) },
         },
         22: { //title: "More Brightness",
             //description: "Lower Memories requirement for further Light Tachyons.",
@@ -249,7 +249,7 @@ addLayer("light", {
         23: { //title: "Power of Light",
             //description: "Light Tachyons' affection also effects The Thread of Two sides.",
             fullDisplay() {
-                let str = "<b>Power of Light</b><br>Light Tachyons' affection also effects The Thread of Two sides."
+                let str = "<b>Power of Light</b><br>Light Tachyons' affection also effects The Thread of Two sides.<br>Currently: " + format(upgradeEffect('light', 23)) + "x";
                 
                 str = str + "<br><br>Cost: " + this.cost() + " Light Tachyons"
                 return str;
@@ -260,7 +260,7 @@ addLayer("light", {
             },
             effect() {
                 let eff = new Decimal(1)
-                eff = eff.times(tmp.light.effect).log10(6)
+                eff = eff.times(tmp.light.effect).log10(6).max(1)
                 return eff;
             },
             cost() { return new Decimal(30) },
@@ -283,7 +283,7 @@ addLayer("light", {
         31: { //title: "Pleasant Landscape",
             //description: "Light Tachyons effect formula now much better.",
             fullDisplay() {
-                let str = "<b>Sadness Overjoy</b><br>Light Tachyons effect formula now much better."
+                let str = "<b>Pleasant Landscape</b><br>Light Tachyons effect formula now much better."
                 
                 str = str + "<br><br>Cost: " + this.cost() + " Light Tachyons"
                 return str;
@@ -292,7 +292,6 @@ addLayer("light", {
             onPurchase() {
                 //1
             },
-            effect() { return layers["light"].effect() },
             cost() { return new Decimal(35) },
         },
         32: { //title: "Moments of Lives",
@@ -336,7 +335,6 @@ addLayer("light", {
             effect() {
                 let eff = player[this.layer].points.plus(1).div(3.2);
                 if (eff.lte(1.25)) return new Decimal(1.25);
-                return max(eff, 1.25);
             },
             cost() { return new Decimal(54) },
         },

@@ -31,9 +31,9 @@ addLayer("mem", {
         mult = new Decimal(1)
         if (hasUpgrade('mem', 12)) mult = mult.times(upgradeEffect('mem', 12))
         if (player.dark.unlocked) mult = mult.times(tmp.dark.effect);
-        if (hasUpgrade('light', 11) && !canReset('light')) mult = mult.times(new Decimal(3))
+        if (hasUpgrade('light', 11) && !canReset('light')) mult = mult.times(3)
         if (hasUpgrade('light', 12)) mult = mult.times(upgradeEffect('light', 12));
-        if (hasUpgrade('mem', 31)) mult = mult.times(upgradeEffect('mem', 31))
+        if (hasUpgrade('mem', 31)) mult = mult.times(upgradeEffect('mem', 31));
 
         return mult
     },
@@ -125,7 +125,7 @@ addLayer("mem", {
             cost() { return new Decimal(50) },
             unlocked() { return hasUpgrade("mem", 21) },
             effect() {
-                return player[this.layer].points.plus(1).pow(0.5)
+                return player[this.layer].points.plus(1).pow(0.5).max(1)
             },
         },
         23: {
@@ -134,7 +134,7 @@ addLayer("mem", {
             cost() { return new Decimal(100) },
             unlocked() { return hasUpgrade("mem", 22) },
             effect() {
-                return player.points.plus(1).times(1.5).log10().log10(2).pow(0.01).plus(1).max(1);
+                return player.points.plus(1).times(1.5).log10().max(1).log10(2).pow(0.01).plus(1).max(1);
             },
         },
         24: {
@@ -146,7 +146,7 @@ addLayer("mem", {
         31: {
             title: "Directly Drown",
             description: "Memories gain is boosted by Fragments.",
-            cost() { return new Decimal(1e10) },
+            cost() { return new Decimal(1e11) },
             unlocked() { return hasUpgrade("mem", 23) && hasAchievement("a", 15) },
             effect() {
                 return player.points.plus(1).pow(0.05).plus(1).log10().plus(2).log10(5).plus(1).max(1);
@@ -155,7 +155,7 @@ addLayer("mem", {
         32: {
             title: "Thought Growth",
             description: "Thought Combination is boosted by Memories.",
-            cost() { return new Decimal(1e11) },
+            cost() { return new Decimal(1e12) },
             unlocked() { return hasUpgrade("mem", 31) },
             effect() {
                 return player[this.layer].points.plus(1).log10().pow(0.5).log10(2).max(1);
@@ -164,7 +164,7 @@ addLayer("mem", {
         33: {
             title: "Memory Inflation",
             description: "Memory Extraction is much faster.",
-            cost() { return new Decimal(5e11) },
+            cost() { return new Decimal(5e12) },
             unlocked() { return hasUpgrade("mem", 32) },
         },
         34: {
@@ -172,11 +172,11 @@ addLayer("mem", {
             description() {
                 return "Light Talcyons and Dark Matters boost each other's gain slightly based on their average.<br>Currently: " + format(upgradeEffect('mem', 34)) + "x";
             },
-            cost() { return new Decimal(1e12) },
+            cost() { return new Decimal(1e13) },
             unlocked() { return hasUpgrade("mem", 33) },
             effect() {
-                let eff = player.light.points.plus(player.dark.points).plus(2).div(2).log10()
-                if (hasUpgrade('light', 33)) eff = player.light.points.plus(player.dark.points).plus(2).div(2).sqrt()
+                let eff = player.light.points.plus(player.dark.points).plus(2).div(2).log10().max(1)
+                if (hasUpgrade('light', 33)) eff = player.light.points.plus(player.dark.points).plus(2).div(2).sqrt().max(1)
                 if (hasUpgrade('light', 23)) eff = eff.times(upgradeEffect('light', 23))
                 if (hasUpgrade('dark', 23)) eff = eff.times(upgradeEffect('dark', 23))
                 return eff

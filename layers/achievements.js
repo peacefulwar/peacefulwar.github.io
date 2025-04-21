@@ -24,22 +24,21 @@ addLayer("a", {
             unlocked() { return true },
         },
         13: {
-            name: "Get Ready",
-            done() { return player.mem.points.gte(9999) },
-            tooltip: "Gain 9999 Memories.<br>Rewards:You start at 5 Memories when reset.",
-            unlocked() { return true },
-        },
-        14: {
             name: "A Step to the Unknown",
             done() { return hasUpgrade('mem', 24) },
             tooltip: "Start exploring the world.",
+            unlocked() { return true },
+        },
+        14: {
+            name: "Get Ready",
+            done() { return player.mem.points.gte(9999) },
+            tooltip: "Gain 9999 Memories.<br>Rewards:You start at 5 Memories when reset.",
             unlocked() { return true },
         },
         15: {
             name: "Define Aspects",
             done() { return player.light.unlocked && player.dark.unlocked },
             tooltip: "Unlock Both Light And Dark Layers.<br>Rewards:They behave as they are unlocked first and there's a new row of Mmeory upgrade.",
-            unlocked() { return true },
         },
         21: {
             name: "Eternal Core",

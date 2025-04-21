@@ -31,7 +31,7 @@ addLayer("dark", {
     base: 1.75,
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1);
-        if (hasUpgrade("mem", 34)) mult = mult.div(upgradeEffect('mem', 34).times(1.3));
+        if (hasUpgrade("mem", 34)) mult = mult.div(upgradeEffect('mem', 34).times(1.3).max(1));
         if (hasUpgrade("dark", 13)) mult = mult.div(upgradeEffect('dark', 13));
         if (hasUpgrade("dark", 14)) mult = mult.div(upgradeEffect('dark', 14));
         if (hasUpgrade("light", 24)) mult = mult.div(upgradeEffect('light', 24));
@@ -229,7 +229,7 @@ addLayer("dark", {
                 
                 return eff;
             },
-            cost() { return new Decimal(22) },
+            cost() { return new Decimal(23) },
         },
         22: { //title: "More Darkness",
             //description: "Lower Fragments requirement for further Dark Matters.",
@@ -243,12 +243,12 @@ addLayer("dark", {
             onPurchase() {
                 //1
             },
-            cost() { return new Decimal(23) },
+            cost() { return new Decimal(24) },
         },
         23: { //title: "Power of Dark",
             //description: "Dark Matters' affection also effects The Thread of Two sides.",
             fullDisplay() {
-                let str = "<b>Power of Dark</b><br>Dark Matters' affection also effects The Thread of Two sides."
+                let str = "<b>Power of Dark</b><br>Dark Matters' affection also effects The Thread of Two sides.<br>Currently: " + format(upgradeEffect('dark', 23)) + "x";
                 
                 str = str + "<br><br>Cost: " + this.cost() + " Dark Matters"
                 return str;
@@ -259,7 +259,7 @@ addLayer("dark", {
             },
             effect() {
                 let eff = new Decimal(1)
-                eff = eff.times(tmp.dark.effect).log10(2)
+                eff = eff.times(tmp.dark.effect).log10(2).max(1)
                 return eff;
             },
             cost() { return new Decimal(30) },
@@ -291,7 +291,6 @@ addLayer("dark", {
             onPurchase() {
                 //1
             },
-            effect() { return layers['dark'].effect() },
             cost() { return new Decimal(35) },
         },
         32: { //title: "Moments of Anger",
