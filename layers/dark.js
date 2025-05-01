@@ -17,15 +17,16 @@ addLayer("dark", {
     },
     unlockOrder() { return (hasUpgrade('mem', 24) ? 0 : player[this.layer].unlockOrder); },
     color: "#383838",
-    requires() { return new Decimal(2e6).times((player.dark.unlockOrder && !player.dark.unlocked) ? 3 : 1) }, // Can be a function that takes requirement increases into account
+    requires() { return new Decimal(5e5).times((player.dark.unlockOrder && !player.dark.unlocked) ? 3 : 1) }, // Can be a function that takes requirement increases into account
     resource: "Dark Matters", // Name of prestige currency
     baseResource: "Fragments", // Name of resource prestige is based on
     baseAmount() { return player.points }, // Get the current amount of baseResource
     type: "static", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
     branches: ["mem"],
     exponent() {
-        let ex = new Decimal(1.1);
-        if (hasUpgrade('dark', 22)) ex = ex.plus(-0.05);
+        let ex = new Decimal(1.25);
+        if (hasUpgrade('dark', 22)) ex = ex.plus(-0.15);
+        if (hasUpgrade('dark', 34)) ex = ex.plus(-0.05);
         return ex;
     }, // Prestige currency exponent
     base: 1.75,
@@ -34,9 +35,13 @@ addLayer("dark", {
         if (hasUpgrade("mem", 34)) mult = mult.div(upgradeEffect('mem', 34).times(1.3).max(1));
         if (hasUpgrade("dark", 13)) mult = mult.div(upgradeEffect('dark', 13));
         if (hasUpgrade("dark", 14)) mult = mult.div(upgradeEffect('dark', 14));
-        if (hasUpgrade("light", 24)) mult = mult.div(upgradeEffect('light', 24));
         if (hasUpgrade("dark", 33)) mult = mult.div(upgradeEffect('dark', 33));
-        //if (hasUpgrade('light', 34)) mult = mult.div(upgradeEffect('light', 34));
+        if (hasUpgrade("light", 24)) mult = mult.div(upgradeEffect('light', 24));
+        if (hasUpgrade('light', 34)) mult = mult.div(upgradeEffect('light', 34));
+        if (hasUpgrade('kou', 14)) mult = mult.div(upgradeEffect('kou', 14));
+        if (hasUpgrade('kou', 23)) mult = mult.div(upgradeEffect('kou', 23));
+        if (hasUpgrade('lethe', 43)) mult = mult.div(upgradeEffect('lethe', 43));
+        if (hasUpgrade('lethe', 34)) mult = mult.div(upgradeEffect('lethe', 34));
         return mult;
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -46,11 +51,12 @@ addLayer("dark", {
     },
 
     update(diff) {
-        player.dark.auto = true;
+        //player.dark.auto = true;
     },
 
     directMult() {
         let dm = new Decimal(1);
+        if (player.kou.unlocked) dm = dm.times(tmp.kou.effect);
 
         return dm;
     },
@@ -59,9 +65,9 @@ addLayer("dark", {
     hotkeys: [
         { key: "d", description: "D: Reset for Dark Matters", onPress() { if (canReset(this.layer)) doReset(this.layer) } },
     ],
-    layerShown() { return hasAchievement("a", 14) },
+    layerShown() { return hasUpgrade("mem", 24) },
     autoPrestige() {
-        return false
+        return (hasMilestone('lethe', 3) && player.dark.auto)
     },
     increaseUnlockOrder: ["light"],
 
@@ -99,9 +105,9 @@ addLayer("dark", {
         3: {
             requirementDescription: "30 Dark Matters",
             done() { return player.dark.best.gte(30) },
-            unlocked() { return player[this.layer].unlocked },
+            unlocked() { return hasAchievement("a", 24) },
             effectDescription() {
-                let str = "Gain 5% of Memories gain every second.";
+                let str = "Gain 10% of Memories gain every second.";
                 return str;
             },
         },
@@ -109,10 +115,17 @@ addLayer("dark", {
 
     doReset(resettingLayer) {
         let keep = [];
-
+        if (hasMilestone('lethe', 3)) keep.push("auto");
+        if (layers[resettingLayer].row > this.row) {
+            layerDataReset('dark', keep);
+            if (hasMilestone('lethe', 0)) player[this.layer].milestones = player[this.layer].milestones.concat([0, 2]);
+            if (hasMilestone('lethe', 2)) player[this.layer].upgrades = player[this.layer].upgrades.concat([11, 12, 13, 14, 21, 22, 23, 24, 31, 32, 33, 34]);
+            if (hasMilestone('lethe', 4)) player[this.layer].milestones = player[this.layer].milestones.concat([1, 3]);
+            //if (hasMilestone('kou', 2) && (player['awaken'].current == 'kou' || player['awaken'].awakened.includes('kou'))) player[this.layer].upgrades = player[this.layer].upgrades.concat([41, 42, 43, 44]);
+        }
     },
     canBuyMax() { return hasMilestone('dark', 2) },
-    //resetsNothing() { return hasMilestone('lethe', 6) },
+    resetsNothing() { return hasMilestone('lethe', 5) },
 
     effectBase() {
         let base = new Decimal(1.5);
@@ -123,6 +136,13 @@ addLayer("dark", {
         if (player[this.layer].points.lte(0)) return new Decimal(1);
         let eff = Decimal.pow(player[this.layer].points.plus(1).log10().plus(1), tmp.dark.effectBase);
         if (hasUpgrade('dark', 31)) eff = Decimal.pow(player[this.layer].points.plus(1).times(2).sqrt().plus(1), tmp.dark.effectBase);
+        if (hasAchievement('a', 32)) eff = eff.times(Decimal.log10(player[this.layer].resetTime + 1).plus(1));
+        if (hasUpgrade('kou', 11)) eff = eff.times(buyableEffect('kou',11));
+        if (hasUpgrade('lethe', 25)) eff = eff.times(upgradeEffect('lethe', 25));
+        if (hasUpgrade('lethe', 35)) eff = eff.times(upgradeEffect('lethe', 35));
+        if (hasUpgrade('lethe', 52)) eff = eff.times(upgradeEffect('lethe', 52));
+        if (hasUpgrade('lethe', 53)) eff = eff.times(upgradeEffect('lethe', 53));
+        if (hasUpgrade('lethe', 55)) eff = eff.times(upgradeEffect('lethe', 55));
 
         if (eff.lt(1)) return new Decimal(1);
         return eff;
@@ -145,7 +165,7 @@ addLayer("dark", {
             },
             unlocked() { return player.dark.unlocked },
             onPurchase() {
-                //player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost);
+                if (hasAchievement("a", 25)) player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost.div(2).floor());
             },
             cost() { return new Decimal(8) },
         },
@@ -162,7 +182,7 @@ addLayer("dark", {
             },
             unlocked() { return hasUpgrade("dark", 11) },
             onPurchase() {
-                //player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost);
+                if (hasAchievement("a", 25)) player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost.div(2).floor());
             },
             effect() {
                 let eff = new Decimal(tmp.dark.effect.pow(0.5));
@@ -184,7 +204,7 @@ addLayer("dark", {
             },
             unlocked() { return hasUpgrade("dark", 12) },
             onPurchase() {
-                //player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost);
+                if (hasAchievement("a", 25)) player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost.div(2).floor());
             },
             effect() {
                 let eff = 1;
@@ -203,7 +223,7 @@ addLayer("dark", {
             },
             unlocked() { return hasUpgrade("dark", 13) },
             onPurchase() {
-                //1
+                if (hasAchievement("a", 25)) player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost.div(2).floor());
             },
             effect() {
                 let eff = player[this.layer].points.plus(1).log10().plus(1).pow(0.5);
@@ -222,7 +242,7 @@ addLayer("dark", {
             },
             unlocked() { return hasUpgrade("dark", 14) },
             onPurchase() {
-                //1
+                if (hasAchievement("a", 25)) player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost.div(2).floor());
             },
             effect() {
                 let eff = new Decimal(50);
@@ -241,7 +261,7 @@ addLayer("dark", {
             },
             unlocked() { return hasUpgrade("dark", 21) },
             onPurchase() {
-                //1
+                if (hasAchievement("a", 25)) player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost.div(2).floor());
             },
             cost() { return new Decimal(24) },
         },
@@ -255,11 +275,11 @@ addLayer("dark", {
             },
             unlocked() { return hasUpgrade("dark", 22) },
             onPurchase() {
-                //1
+                if (hasAchievement("a", 25)) player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost.div(2).floor());
             },
             effect() {
                 let eff = new Decimal(1)
-                eff = eff.times(tmp.dark.effect).log10(2).max(1)
+                eff = eff.times(tmp.dark.effect).log(2).max(1)
                 return eff;
             },
             cost() { return new Decimal(30) },
@@ -274,7 +294,7 @@ addLayer("dark", {
             },
             unlocked() { return hasUpgrade("dark", 23) },
             onPurchase() {
-                //1
+                if (hasAchievement("a", 25)) player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost.div(2).floor());
             },
             effect() { return layers['dark'].effect() },
             cost() { return new Decimal(33) },
@@ -289,7 +309,7 @@ addLayer("dark", {
             },
             unlocked() { return hasUpgrade("dark", 24) },
             onPurchase() {
-                //1
+                if (hasAchievement("a", 25)) player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost.div(2).floor());
             },
             cost() { return new Decimal(35) },
         },
@@ -303,7 +323,7 @@ addLayer("dark", {
             },
             unlocked() { return hasUpgrade("dark", 31) },
             onPurchase() {
-                //1
+                if (hasAchievement("a", 25)) player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost.div(2).floor());
             },
             effect() {
                 let eff = player[this.layer].points.div(2);
@@ -322,7 +342,7 @@ addLayer("dark", {
             },
             unlocked() { return hasUpgrade("dark", 32) },
             onPurchase() {
-                //if (hasMilestone('dark', 0) && !player['awaken'].current == this.layer) player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost.times(new Decimal(0.5 + (player.a.achievements.length - 6) / 10).min(1)).floor());
+                if (hasAchievement("a", 25)) player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost.div(2).floor());
             },
             effect() {
                 let eff = player.a.achievements.length;
@@ -341,7 +361,7 @@ addLayer("dark", {
             },
             unlocked() { return hasUpgrade("dark", 33) },
             onPurchase() {
-                //if (hasMilestone('dark', 0) && !player['awaken'].current == this.layer) player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost.times(new Decimal(0.5 + (player.a.achievements.length - 6) / 10).min(1)).floor());
+                if (hasAchievement("a", 25)) player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost.div(2).floor());
             },
             effect() {
                 let eff = player[this.layer].points.div(3);

@@ -49,9 +49,12 @@ function getPointGen() {
 	if (hasUpgrade('mem', 14)) gain = gain.times(upgradeEffect('mem', 14));
 	if (hasUpgrade('mem', 22)) gain = gain.times(upgradeEffect('mem', 22));
 	if (player.light.unlocked) gain = gain.times(tmp.light.effect);
-	if (hasUpgrade('dark', 11) && !canReset('dark')) gain = gain.times(new Decimal(2))
+	if (hasUpgrade('dark', 11) && !canReset('dark')) gain = gain.times(2)
 	if (hasUpgrade('dark', 12)) gain = gain.times(upgradeEffect('dark',12));
+	if (player.lethe.unlocked) gain = gain.times(tmp.lethe.effect);
+	if (hasUpgrade('kou', 15)) gain = gain.times(upgradeEffect('kou', 15))
 
+	if (hasUpgrade('kou', 21)) gain = gain.pow(1.025)
 
 	return gain
 }
@@ -66,7 +69,7 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	return player.points.gte(new Decimal("e280000000"))
+	return player.points.gte(new Decimal("5e200"))
 }
 
 
