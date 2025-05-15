@@ -43,6 +43,8 @@ addLayer("light", {
         if (hasUpgrade('lethe', 11)) mult = mult.div(upgradeEffect('lethe', 11));
         if (hasUpgrade('lethe', 23)) mult = mult.div(upgradeEffect('lethe', 23));
         if (hasUpgrade('lethe', 32)) mult = mult.div(upgradeEffect('lethe', 32));
+        if (hasMilestone('lab', 3)) mult = mult.div(player.lab.power.div(10).max(1));
+        if (hasUpgrade('lab', 83)) mult = mult.div(buyableEffect('lab', 21));
         return mult;
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -52,12 +54,14 @@ addLayer("light", {
     },
 
     update(diff) {
-        //player.light.auto = true;
+        player.light.auto = true;
     },
 
     directMult() {
         let dm = new Decimal(1);
         if (player.kou.unlocked) dm = dm.times(tmp.kou.effect);
+        if (inChallenge('world', 12)) dm = dm.times(10);
+        else if (hasChallenge('world', 12)) dm = dm.times(5);
         
         return dm;
     },
@@ -99,13 +103,13 @@ addLayer("light", {
             done() { return player.light.best.gte(20) },
             unlocked() { return player[this.layer].unlocked },
             effectDescription() {
-                let str = "You can buy max Light Tachyons & keep your last two Memory upgrades on row3 when L or D reset.";
+                let str = "You can buy max Light Tachyons & keep your first two Memory upgrades on row3 when L or D reset.";
                 return str;
             },
         },
         3: {
             requirementDescription: "30 Light Tachyons",
-            done() { return player.light.best.gte(30) },
+            done() { return player.light.best.gte(30) && hasUpgrade("mem", 41) },
             unlocked() { return hasAchievement("a", 24) },
             effectDescription() {
                 let str = "Gain 10% of Memories gain every second.";
@@ -144,7 +148,8 @@ addLayer("light", {
         if (hasUpgrade('lethe', 14)) eff = eff.times(upgradeEffect('lethe', 14));
         if (hasUpgrade('lethe', 31)) eff = eff.times(upgradeEffect('lethe', 31));
         if (hasUpgrade('lethe', 41)) eff = eff.times(upgradeEffect('lethe', 41));
-
+        
+        if (player.world.randomChallenge && !hasUpgrade('story', 13)) eff = eff.pow(Math.random())
         if (eff.lt(1)) return new Decimal(1);
         return eff;
     },
@@ -270,7 +275,7 @@ addLayer("light", {
         23: { //title: "Power of Light",
             //description: "Light Tachyons' affection also effects The Thread of Two sides.",
             fullDisplay() {
-                let str = "<b>Power of Light</b><br>Light Tachyons' affection also effects The Thread of Two sides.<br>Currently: " + format(upgradeEffect('light', 23)) + "x";
+                let str = "<b>Power of Light</b><br>Light Tachyons effect also effects The Thread of Two sides at a reduced rate.";
                 
                 str = str + "<br><br>Cost: " + this.cost() + " Light Tachyons"
                 return str;

@@ -42,6 +42,8 @@ addLayer("dark", {
         if (hasUpgrade('kou', 23)) mult = mult.div(upgradeEffect('kou', 23));
         if (hasUpgrade('lethe', 43)) mult = mult.div(upgradeEffect('lethe', 43));
         if (hasUpgrade('lethe', 34)) mult = mult.div(upgradeEffect('lethe', 34));
+        if (hasMilestone('lab', 4)) mult = mult.div(player.lab.power.div(10).max(1));
+        if (hasUpgrade('lab', 84)) mult = mult.div(buyableEffect('lab', 22));
         return mult;
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -57,6 +59,8 @@ addLayer("dark", {
     directMult() {
         let dm = new Decimal(1);
         if (player.kou.unlocked) dm = dm.times(tmp.kou.effect);
+        if (inChallenge('world', 12)) dm = dm.times(10);
+        else if (hasChallenge('world', 12)) dm = dm.times(5);
 
         return dm;
     },
@@ -98,13 +102,13 @@ addLayer("dark", {
             done() { return player.dark.best.gte(20) },
             unlocked() { return player[this.layer].unlocked },
             effectDescription() {
-                let str = "You can buy max Dark Matters & Keep your first two Memory upgrades on row3 when L or D reset.";
+                let str = "You can buy max Dark Matters & Keep your last two Memory upgrades on row3 when L or D reset.";
                 return str;
             },
         },
         3: {
             requirementDescription: "30 Dark Matters",
-            done() { return player.dark.best.gte(30) },
+            done() { return player.dark.best.gte(30) && hasUpgrade("mem", 41) },
             unlocked() { return hasAchievement("a", 24) },
             effectDescription() {
                 let str = "Gain 10% of Memories gain every second.";
@@ -143,6 +147,8 @@ addLayer("dark", {
         if (hasUpgrade('lethe', 52)) eff = eff.times(upgradeEffect('lethe', 52));
         if (hasUpgrade('lethe', 53)) eff = eff.times(upgradeEffect('lethe', 53));
         if (hasUpgrade('lethe', 55)) eff = eff.times(upgradeEffect('lethe', 55));
+        
+        if (player.world.randomChallenge && !hasUpgrade('story', 13)) eff = eff.pow(Math.random())
 
         if (eff.lt(1)) return new Decimal(1);
         return eff;
@@ -268,7 +274,7 @@ addLayer("dark", {
         23: { //title: "Power of Dark",
             //description: "Dark Matters' affection also effects The Thread of Two sides.",
             fullDisplay() {
-                let str = "<b>Power of Dark</b><br>Dark Matters' affection also effects The Thread of Two sides.<br>Currently: " + format(upgradeEffect('dark', 23)) + "x";
+                let str = "<b>Power of Dark</b><br>Dark Matters effect also effects The Thread of Two sides at a reduced rate.";
                 
                 str = str + "<br><br>Cost: " + this.cost() + " Dark Matters"
                 return str;

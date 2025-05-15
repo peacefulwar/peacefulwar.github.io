@@ -33,11 +33,12 @@ addLayer("kou", {
         if (hasAchievement('a', 34)) mult = mult.div(tmp.light.effect);
         if (hasUpgrade('lethe', 24)) mult = mult.div(upgradeEffect('lethe', 24));
         if (hasUpgrade('kou', 16)) mult = mult.div(upgradeEffect('kou', 16));
-        /*if (hasMilestone('lab', 5)) mult = mult.div(player.lab.power.div(10).max(1));
+        if (hasMilestone('lab', 5)) mult = mult.div(player.lab.power.div(10).max(1));
         if (hasUpgrade('lab', 93)) mult = mult.div(buyableEffect('lab', 31));
-        if (hasMilestone('rei', 4)) mult = mult.div(tmp["rei"].challenges[11].effecttoRF);
-        if (hasMilestone('ins', 1)) mult = mult.div(layers.ins.insEffect().Fra().Pos());
-        if (inChallenge('kou', 62) || hasChallenge('kou', 62)) mult = mult.div(challengeEffect('kou', 62));*/
+        if (hasMilestone('zero', 4)) mult = mult.div(tmp["zero"].challenges[11].effecttoRF);
+        if (inChallenge('world', 21)) mult = mult.div(buyableEffect('axium', 11));
+        //if (hasMilestone('ins', 1)) mult = mult.div(layers.ins.insEffect().Fra().Pos());
+        //if (inChallenge('kou', 62) || hasChallenge('kou', 62)) mult = mult.div(challengeEffect('kou', 62));
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -58,16 +59,18 @@ addLayer("kou", {
         if (hasUpgrade('lethe', 15)) eff = eff.times(upgradeEffect('lethe', 15));
         if (hasUpgrade('lethe', 12)) eff = eff.times(upgradeEffect('lethe', 12));
         if (hasUpgrade('lethe', 45)) eff = eff.times(upgradeEffect('lethe', 45));
+        
+        if (player.world.randomChallenge && !hasUpgrade('story', 13)) eff = eff.pow(Math.random())
         return eff;
     },
     effectDescription() {
         return "which are directly boosting Light Tachyons and Dark Matters gain by " + format(tmp.kou.effect) + "x"
     },
-    canBuyMax() { return false /*hasUpgrade('lab', 61)*/ },
+    canBuyMax() { return hasUpgrade('lab', 61) },
     autoPrestige() {
-        return false //(hasUpgrade('lab', 71) && player.kou.auto)
+        return (hasUpgrade('lab', 71) && player.kou.auto)
     },
-    resetsNothing() { return false /*hasUpgrade('lab', 81)*/ },
+    resetsNothing() { return hasUpgrade('lab', 81) },
 
     row: 2, // Row the layer is in on the tree (0 is the first row)
     displayRow: 2,
@@ -77,8 +80,26 @@ addLayer("kou", {
     layerShown() { return hasAchievement('a', 24) },
     increaseUnlockOrder: ["lethe"],
 
+    update(diff) {
+        if (layers.kou.buyables[11].autoed() && player.points.gte(layers.kou.buyables[11].cost().fo)) layers.kou.buyables[11].buy();
+    },
+
+    shouldNotify(){
+        if (layers.kou.buyables[11].canAfford()) return true
+    },
+
     doReset(resettingLayer) {
         let keep = [];
+        //if (hasMilestone('kou', 3)) keep.push("auto");
+        if (layers[resettingLayer].row > this.row) {
+            layerDataReset('kou', keep);
+            if (hasMilestone('zero', 0)) player[this.layer].milestones = player[this.layer].milestones.concat([0, 1, 2, 3, 4, 5]);
+            if (hasMilestone('zero', 1)) {
+                player[this.layer].milestones = player[this.layer].milestones.concat([6]);
+                player[this.layer].upgrades = player[this.layer].upgrades.concat([11, 12, 13, 14, 15, 16]);
+            }
+            if (hasMilestone('zero', 2)) player[this.layer].upgrades = player[this.layer].upgrades.concat([21, 22, 23, 24, 25]);
+        }
     },
 
     milestones: {
@@ -130,25 +151,36 @@ addLayer("kou", {
     },
 
     tabFormat: [
-                "main-display",
-                "blank",
-                "prestige-button",
-                "resource-display",
-                "blank",
-                "milestones",
-                "blank", "blank",
-                "buyables",
-                "blank", "blank",
-                ["display-text", function () { return 'Upgrades in the first row will each add a new effect to the Tower instead of directly affect the game.' } ],
-                "blank",
-                "upgrades"
+        "main-display",
+        "blank",
+        "prestige-button",
+        "resource-display",
+        "blank",
+        "milestones",
+        "blank", "blank",
+        "buyables",
+        "blank",
+        ["display-text", function () { return 'The max level of the Tower is determined by current unlocked layers, each provides 10.' } ],
+        ["display-text", function () { return 'Upgrades in the first row will each add a new effect to the Tower instead of directly affect the game.' } ],
+        "blank",
+        "upgrades"
     ],
+
     buyables: {
         11: {
-            fullDisplay() {
-                let str = "The Tower"
-                str = str + "<br><br>Cost: " + this.cost() + " Red Dolls"
-                return str; 
+            reachedMax() {
+                let maximum = 0;//每加一个层都回来看一遍（做得到吗
+                if (player.mem.unlocked) maximum += 10;
+                if (player.light.unlocked) maximum += 10;
+                if (player.dark.unlocked) maximum += 10;
+                if (player.kou.unlocked) maximum += 10;
+                if (player.lethe.unlocked) maximum += 10;
+                if (player.lab.unlocked) maximum += 10;
+                if (player.zero.unlocked) maximum += 10;
+                if (player.axium.unlocked) maximum += 10;
+                if (player.world.unlocked) maximum += 10;
+                if (player.story.unlocked) maximum += 10;
+                return player.kou.buyables[this.id].gte(maximum)
             },
             title: "The Tower",
             unlocked() { return player.kou.unlocked },
@@ -159,7 +191,9 @@ addLayer("kou", {
                 let data = tmp[this.layer].buyables[this.id];
                 let cost = data.cost;
                 let amt = player[this.layer].buyables[this.id];
-                let display = formatWhole(player.points) + " / " + formatWhole(cost.fo) + " Fragments" + "<br><br>Level: " + formatWhole(amt) + "<br><br>Reward: Memories gain";
+                let display = formatWhole(player.points) + " / " + formatWhole(cost.fo) + " Fragments" + "<br><br>Level: " + formatWhole(amt);
+                if (this.reachedMax()) display = display + " (MAXED)";
+                display = display + "<br><br>Reward: Memories gain";
                 if (hasUpgrade("kou", 11)) display = display + " and L & D's effect are boosted by " + formatWhole(data.effect) + "x";
                 else display = display + " is boosted by " + formatWhole(data.effect) + "x";
                 if (hasUpgrade("kou", 13) && !hasUpgrade("kou", 14)) display = display + "<br>Light Tachyons gain is boosted by " + format(upgradeEffect('kou', 13)) + "x";
@@ -169,33 +203,41 @@ addLayer("kou", {
                 if (hasUpgrade("kou", 16)) display = display + "<br>Red Dolls gain is boosted by " + format(upgradeEffect('kou', 16)) + "x";
                 if (hasUpgrade("kou", 12)) display = display + "<br>and Memory softcap starts " + formatWhole(data.effect) + "x later.";
                 else display = display + ".";
-                if (amt.gte(15)) display = display + "<br>You can buy " + formatWhole(amt.sub(14).max(1).min(8)) + " more Beacons."
+                if (amt.gte(15)) display = display + "<br>Furthermore, you can buy " + formatWhole(amt.sub(14).max(1).min(8)) + " more Beacons."
                 return display;
             },
             effect() {
                 let effbase = 3
-                return Decimal.pow(effbase, new Decimal(player[this.layer].buyables[this.id]))
+                if (inChallenge('world', 12)) effbase = 1.1
+                return Decimal.pow(effbase, new Decimal(player[this.layer].buyables[this.id])).max(1)
             },
             cost(x = player[this.layer].buyables[this.id]) {
-                let y = x.div(10).floor()
-                z = y.plus(3).times(x).sub(y.times(y.plus(1)).times(5))
-                return {
-                    fo: new Decimal(1e24).times(Decimal.pow(10, z)),
-                };
+                let y = x.div(10).floor();
+                z = y.plus(3).times(x).sub(y.times(y.plus(1)).times(5));
+                let cost = new Decimal(0);
+                if (inChallenge('world', 12)) cost = new Decimal(1e4).times(Decimal.pow(100, x));
+                else if (!hasUpgrade("lab", 91)) cost = new Decimal(1e24).times(Decimal.pow(10, z));
+                else cost = new Decimal(1e4).times(Decimal.pow(10, z))
+                return { fo: cost, };
             },
             canAfford() {
+                if (this.autoed()) return false;
                 if (!tmp[this.layer].buyables[this.id].unlocked) return false;
                 let cost = layers[this.layer].buyables[this.id].cost();
-                return player[this.layer].unlocked && player.points.gte(cost.fo) /*&& !this.autoed()*/;
+                return !this.reachedMax() && player[this.layer].unlocked && player.points.gte(cost.fo) /*&& !this.autoed()*/;
             },
             buy() {
                 let cost = layers[this.layer].buyables[this.id].cost();
                 player.points = player.points.sub(cost.fo);
                 player.kou.buyables[this.id] = player.kou.buyables[this.id].plus(1);
             },
+            autoed() {
+                return !this.reachedMax() && hasUpgrade('lab', 91);
+            }
             //style: { 'height': '200px', 'width': '200px' },
         },
     },
+
     upgrades: {
         11: {
             fullDisplay() {
@@ -232,7 +274,9 @@ addLayer("kou", {
                 //player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost);
             },
             effect(){
-                return new Decimal(3).times(player[this.layer].buyables[11])
+                if (inChallenge('world', 12)) return new Decimal(2).times(player[this.layer].buyables[11]).max(1)
+                if (hasUpgrade("lab", 91)) return new Decimal(2).pow(player[this.layer].buyables[11]).max(1)
+                return new Decimal(3).times(player[this.layer].buyables[11]).max(1)
             },
             cost() { return new Decimal(25) },
         },
@@ -247,7 +291,9 @@ addLayer("kou", {
                 //player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost);
             },
             effect(){
-                return new Decimal(3).times(player[this.layer].buyables[11])
+                if (inChallenge('world', 12)) return new Decimal(2).times(player[this.layer].buyables[11]).max(1)
+                if (hasUpgrade("lab", 91)) return new Decimal(2).pow(player[this.layer].buyables[11]).max(1)
+                return new Decimal(3).times(player[this.layer].buyables[11]).max(1)
             },
             cost() { return new Decimal(25) },
         },
@@ -262,7 +308,8 @@ addLayer("kou", {
                 //player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost);
             },
             effect(){
-                return new Decimal(2).pow(player[this.layer].buyables[11])
+                if (inChallenge('world', 12)) return new Decimal(3).times(player[this.layer].buyables[11]).max(1)
+                return new Decimal(2).pow(player[this.layer].buyables[11]).max(1)
             },
             cost() { return new Decimal(44) },
         },
@@ -272,12 +319,14 @@ addLayer("kou", {
                 str = str + "<br><br>Cost: " + this.cost() + " Red Dolls"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 13) && hasUpgrade("kou", 14) },
+            unlocked() { return hasUpgrade("kou", 15) },
             onPurchase() {
                 //player[this.layer].points = player[this.layer].points.plus(tmp[this.layer].upgrades[this.id].cost);
             },
             effect(){
-                return new Decimal(1.5).times(player[this.layer].buyables[11])
+                if (inChallenge('world', 12)) return new Decimal(2).times(player[this.layer].buyables[11]).max(1)
+                if (hasUpgrade("lab", 91)) return new Decimal(3).pow(player[this.layer].buyables[11]).max(1)
+                return new Decimal(1.5).times(player[this.layer].buyables[11]).max(1)
             },
             cost() { return new Decimal(54) },
         },

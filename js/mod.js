@@ -12,12 +12,23 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.0.1",
-	name: "A Glimpse of the World",
+	num: "0.0.3",
+	name: "\"Now Everything Worked\"",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
-	<h3>v0.0</h3><br>
+	<h3>v0.0.3 \"Now Everything Worked\"</h3><br>
+		- Call row4 completed.<br>
+		- Building Story Layer.<br>
+		- Bug fix.<br><br>
+	<h3>v0.0.2.1 Crimson and Ambivalence</h3><br>
+		- Bug fix.<br><br>
+	<h3>v0.0.2 Crimson and Ambivalence</h3><br>
+		- Call row3 completed.<br>
+		- Bug fix.<br><br>
+	<h3>v0.0.1 A Glimpse of the World</h3><br>
+		- Call row2 completed.<br><br>
+	<h3>v0.0 Currently, nothing here.</h3><br>
 		- Added things.<br>
 		- Added stuff.`
 
@@ -53,8 +64,13 @@ function getPointGen() {
 	if (hasUpgrade('dark', 12)) gain = gain.times(upgradeEffect('dark',12));
 	if (player.lethe.unlocked) gain = gain.times(tmp.lethe.effect);
 	if (hasUpgrade('kou', 15)) gain = gain.times(upgradeEffect('kou', 15))
+	if (hasMilestone('lab',0)) gain = gain.times(player.lab.power.div(10).max(1));
+	if (hasMilestone('lab',1)) gain = gain.times(player.lab.points.max(1));
+	if (hasUpgrade('story', 12)) gain = gain.times(tmp["zero"].challenges[11].effecttoFragMem);
 
 	if (hasUpgrade('kou', 21)) gain = gain.pow(1.025)
+	if (hasUpgrade('lab',73)) gain = gain.pow(buyableEffect('lab',12).eff1());
+	if (inChallenge('zero',11)) gain = gain.pow(0.5);
 
 	return gain
 }
@@ -69,7 +85,7 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	return player.points.gte(new Decimal("5e200"))
+	return player.points.gte(new Decimal("5e2000000000"))
 }
 
 

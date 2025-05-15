@@ -114,12 +114,123 @@ addLayer("a", {
             name: "Preparation has been made.",
             done() { return hasUpgrade("kou", 16) },
             tooltip: "Buy all Tower upgrades.<br>Rewards: You can buy 4 more Beacons.",
-            unlocked() { return true },
         },
         44: {
             name: "Beacons Beside Lethe",
             done() { return player.lethe.upgrades.length >= 25 },
             tooltip: "Have 25 Guiding Beacons.",
+        },
+        45: {
+            name: "The Lab.",
+            done() { return hasUpgrade('mem', 42) },
+            tooltip: "Set up the Lab.<br>Unlock Lab Layer and gain 1 Research Point.",
+        },
+        51: {
+            name: "\"A Professional lab in its……field.\"",
+            done() { return hasMilestone('lab', 7) },
+            tooltip: "Build up your reputation among scientists.",
+        },
+        52: {
+            name: "A Working Lab",
+            done() { return player.lab.points.gte(1000) },
+            tooltip: "Gain 1000 Research Points.",
+        },
+        53: {
+            name: "Dollhouse",
+            done() { return player.kou.points.gte(100) },
+            tooltip: "Have more than 100 Red Dolls.<br>Rewards:Guiding Beacons will give back their Red Dolls cost.",
+        },
+        54: {
+            name: "Founding Relics",
+            done() { return player.zero.unlocked && player.axium.unlocked },
+            tooltip: "Unlocked both Anonymous Layers<br>Rewards:Research Point gain x1.5.",
+        },
+        55: {
+            name: "Sea of Drops",
+            done() { return player.lethe.points.gte(1e200) },
+            tooltip: "Have more than 1e200 Forgotten Drops.",
+        },
+        61: {
+            name: "The World",
+            done() { return player.world.unlocked },
+            tooltip: "Unlocked World Layer.",
+        },
+        62: {
+            name: "The First Map",
+            done() { return hasChallenge('world', 11) },
+            tooltip: "Finish the first challenge in the world layer.<br>Rewards:The speed of World Steps gain is doubled.",
+        },
+        63: {
+            name: "The True Presbyter of The World",
+            done() { return player.zero.roses.gte(100) },
+            tooltip: "Gain 100 Glowing Roses.<br>Rewards:Glowing Roses now boosts The Speed of World Steps gain.",
+            effect() {
+                if (player['zero'].roses.lte(0)) return new Decimal(1);
+                let eff = player.zero.roses.plus(1).log10().plus(1);
+                if (hasAchievement('a', 75)) eff = player.zero.roses.plus(1).log(7.5).plus(1);
+                //if (hasAchievement('a', 93)) eff = eff.times(tmp.etoluna.starPointeffect);
+                //if (hasUpgrade('lethe', 63)) eff = eff.times(upgradeEffect('lethe', 63));
+                //if (hasUpgrade('lethe', 64)) eff = eff.times(upgradeEffect('lethe', 64));
+                //if (hasUpgrade('lethe', 65)) eff = eff.times(upgradeEffect('lethe', 65));
+                //if (hasUpgrade('lethe', 75)) eff = eff.times(upgradeEffect('lethe', 75));
+                //if (hasUpgrade('lethe', 85)) eff = eff.times(upgradeEffect('lethe', 85));
+                return eff;
+            },
+        },
+        64: {
+            name: "Dire Straits",
+            done() { return player.axium.timesmoved.gte(10) },
+            tooltip: "Move more than 10 times in the Maze<br>Rewards:Gain more 5 moves in the Maze.",
+        },
+        65: {
+            name: "Triangulation",
+            done() { return hasMilestone('zero', 4) && hasMilestone('axium', 4) },
+            tooltip: "Reach LC & FL's 5th milestone.<br>Rewards:The speed of World Steps gain x1.5.",
+        },
+        71: {
+            name: "Direct Synergy",
+            done() { return hasChallenge('world', 21) && hasUpgrade('lab', 113) && hasUpgrade('lab', 114) },
+            tooltip: "Make all row4 source boost each other's gain.(For now)<br>Rewards: Unlock more types of World Steps in the World Layer.",
+        },
+        72: {
+            name: "Nothing Can Stop Us",
+            done() { return player.world.restrictionnum.gte(10) && player.world.fixednum.gte(10) },
+            tooltip: "Go through more than 10 Restriction Steps and Fixed Speed Steps.<br>Rewards:You can choose among two directions in Maze.",
+        },
+        73: {
+            name: "Anthemy",
+            done() { return player.zero.roses.gte(1000) },
+            tooltip: "Gain 1000 Glowing Roses.<br>Rewards:Entering Zero Sky halves your GR instead of resetting them.",
+        },
+        74: {
+            name: "There's no Limit!",
+            done() { return player.points.gte(1.79e308) },
+            tooltip: "Reach 1.79e308 Fragments.",
+        },
+        75: {
+            name: "Fully Upgraded",
+            done() { return hasUpgrade('lab',131) && hasUpgrade('lab',132) && hasUpgrade('lab',133) && hasUpgrade('lab',134) },
+            tooltip: "Improve the Maze formulas.<br>Rewards:Glowing Roses boost The Speed of World Steps gain better.",
+        },
+        81: {
+            name: "\"Currently, nothing here.\"",
+            done() { return player.story.unlocked },
+            tooltip: "Begin Your stories.",
+        },
+        82: {
+            name: "Higher and Higher",
+            done() { return player.world.points.gte(1000) },
+            tooltip: "Gain 1000 World Steps.<br>Rewards:You can choose among three directions in Maze.",
+        },
+        83: {
+            name: "Irregular Florescence",
+            done() { return inChallenge('zero', 11) && player.world.randomChallenge },
+            tooltip: "Entering Zero Sky when going on random steps.",
+        },
+        84: {
+            name: "Lossy Move",
+            done() { return player.axium.timesmoved.gte(100) },
+            tooltip: "Move more than 100 times in the Maze<br>Rewards:You can choose all four directions in Maze.",
         },
 
     },
@@ -127,8 +238,6 @@ addLayer("a", {
         "blank",
         ["display-text", function () { return "When boosts say sth about achievements, usually it relates to the amount of achievements you have." }],
         ["display-text", function () { return "Achievements: " + player.a.achievements.length + "/" + (Object.keys(tmp.a.achievements).length - 2) }],
-        ["display-text", function () { return "Currently, softcap power is: " + format(tmp["mem"].softcapPower) }],
-        ["display-text", function () { return "Currently, softcap is: " + format(tmp["mem"].softcap) }],
         "blank", "blank",
         "achievements",
     ],

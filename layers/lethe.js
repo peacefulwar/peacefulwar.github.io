@@ -9,6 +9,7 @@ addLayer("lethe", {
             best: new Decimal(0),
             total: new Decimal(0),
             unlockOrder: 0,
+            nodeSlots: 0,
             demile: [],
             deupg: [],
         }
@@ -28,12 +29,11 @@ addLayer("lethe", {
         mult = new Decimal(1);
         if (hasMilestone('kou', 4)) mult = mult.times(tmp.kou.effect);
         if (hasAchievement('a', 34)) mult = mult.times(tmp.dark.effect);
-        //if (hasUpgrade('lethe',42)) mult = mult.times(player.mem.points.plus(1).log10().max(1));
-        //if (hasUpgrade('lethe', 42)) mult = mult.times(upgradeEffect('lethe', 42));
-        //if (hasChallenge('kou', 41)) mult = mult.times(tmp.lethe.buyables[11].effect);
-        //if (hasMilestone('lab', 6)) mult = mult.times(player.lab.power.div(10).max(1));
-        //if (hasUpgrade('lab', 94)) mult = mult.times(buyableEffect('lab', 32));
-        //if (hasMilestone('rei', 4)) mult = mult.times(tmp["rei"].challenges[11].effecttoRF);
+        if (hasUpgrade('lethe', 42)) mult = mult.times(upgradeEffect('lethe', 42));
+        if (hasMilestone('lab', 6)) mult = mult.times(player.lab.power.div(10).max(1));
+        if (hasUpgrade('lab', 94)) mult = mult.times(buyableEffect('lab', 32));
+        if (hasMilestone('zero', 4)) mult = mult.times(tmp["zero"].challenges[11].effecttoRF);
+        if (inChallenge('world', 21)) mult = mult.div(buyableEffect('axium', 11));
         //if (hasMilestone('ins', 1)) mult = mult.times(layers.ins.insEffect().Deu().Pos());
         //if (inChallenge('kou', 62) || hasChallenge('kou', 62)) mult = mult.times(challengeEffect('kou', 62));
         return mult
@@ -54,13 +54,13 @@ addLayer("lethe", {
     passiveGeneration() {
         //if (layers['lethe'].deactivated() || player['awaken'].current == this.layer) return 0;
         let pg = 0;
-        //if (hasUpgrade('lab', 62)) pg = pg + 0.1;
+        if (hasUpgrade('lab', 62)) pg = pg + 0.1;
         return pg;
     },
 
     update(diff) {
-        //if (layers.lethe.buyables[11].autoed() && layers.lethe.buyables[11].canAfford()) layers.lethe.buyables[11].buy();
         if (isNaN(player.lethe.points.toNumber()) || player.lethe.points.lte(0)) player.lethe.points = new Decimal(0);
+        if (!layers.lethe.tabFormat["Beacons"].unlocked() && player.subtabs.lethe.mainTabs == "Beacons") player.subtabs.lethe.mainTabs = "Milestones";
     },
 
     doReset(resettingLayer) {
@@ -68,18 +68,18 @@ addLayer("lethe", {
         let keep = [];
         if (layers[resettingLayer].row > this.row) {
             layerDataReset("lethe", keep);
-            //if (hasMilestone('yugamu', 0)) player.lethe.milestones = player.lethe.milestones.concat([0, 1, 2, 3, 4, 5, 6]);
-            //if (hasMilestone('yugamu', 1)) player.lethe.milestones.push(7);
+            if (hasMilestone('axium', 0)) player.lethe.milestones = player.lethe.milestones.concat([0, 1, 2, 3, 4, 5]);
+            if (hasMilestone('axium', 1)) player.lethe.milestones.push(6);
             //keep upgrades
-            /*if (hasUpgrade('lab', 72)) {
+            if (hasUpgrade('lab', 72)) {
                 let auto = [11, 15, 51, 55];
                 if (hasUpgrade('lab', 82)) auto = auto.concat([13, 31, 35, 53]);
                 if (hasUpgrade('lab', 92)) auto = auto.concat([12, 14, 21, 25, 41, 45, 52, 54]);
-                if (hasMilestone('yugamu', 2)) auto = auto.concat([22, 23, 24, 32, 33, 34, 42, 43, 44]);
+                if (hasMilestone('axium', 2)) auto = auto.concat([22, 23, 24, 32, 33, 34, 42, 43, 44]);
                 for (var i = 0; i < auto.length; i++) {
                     if (!hasUpgrade('lethe', auto[i])) player.lethe.upgrades.push(auto[i]);
                 }
-            };*/
+            };
             //if (inChallenge('saya', 32)) player[this.layer].upgrades = tempupgrades;
         }
     },
@@ -204,12 +204,11 @@ addLayer("lethe", {
                 ["display-text", function () { return "Build the Tower or buy Red upgrades to expand your Beacon limit."}],
                 ["display-text", function () { return "You have " + formatWhole(layers['lethe'].BeaconLength()) + " Beacons, and now you can have " + formatWhole(tmp.lethe.nodeSlots) + " Beacons at most."}], "blank",
                 "clickables", "blank",
-                "upgrades",
-                /*["row", [["upgrade", "11"], ["upgrade", "12"], ["upgrade", "13"], ["upgrade", "14"], ["upgrade", "15"],]],
+                ["row", [["upgrade", "11"], ["upgrade", "12"], ["upgrade", "13"], ["upgrade", "14"], ["upgrade", "15"],]],
                 ["row", [["upgrade", "21"], ["upgrade", "22"], ["upgrade", "23"], ["upgrade", "24"], ["upgrade", "25"],]],
                 ["row", [["upgrade", "31"], ["upgrade", "32"], ["upgrade", "33"], ["upgrade", "34"], ["upgrade", "35"],]],
                 ["row", [["upgrade", "41"], ["upgrade", "42"], ["upgrade", "43"], ["upgrade", "44"], ["upgrade", "45"],]],
-                ["row", [["upgrade", "51"], ["upgrade", "52"], ["upgrade", "53"], ["upgrade", "54"], ["upgrade", "55"],]],*/
+                ["row", [["upgrade", "51"], ["upgrade", "52"], ["upgrade", "53"], ["upgrade", "54"], ["upgrade", "55"],]],
             ]
         },
     },
@@ -229,16 +228,19 @@ addLayer("lethe", {
         if (hasUpgrade('lethe', 21)) eff = eff.times(upgradeEffect('lethe', 21));
         if (hasUpgrade('lethe', 51)) eff = eff.times(upgradeEffect('lethe', 51));
         if (hasUpgrade('lethe', 54)) eff = eff.times(upgradeEffect('lethe', 54));
+        if (hasUpgrade('lab', 164)) eff = eff.times(buyableEffect('lab', 32).div(10).max(1));
+        
+        if (player.world.randomChallenge && !hasUpgrade('story', 13)) eff = eff.pow(Math.random())
+            
         //if (player['awaken'].current == this.layer || player['awaken'].awakened.includes(this.layer)) eff = new Decimal(player[this.layer].points.plus(1).pow(3.25).log10().plus(1));
         //if (inChallenge('kou', 22)) eff = eff.times(1 + Math.random() * 0.5);
         //if (inChallenge('kou', 41)) eff = eff.times(buyableEffect('lethe', 11));
         //if (hasAchievement('kou', 45)) eff = eff.times(player[this.layer].buyables[11].div(2).max(1));
-        //if (hasUpgrade('lab', 164)) eff = eff.times(buyableEffect('lab', 32).div(10).max(1));
         //if (hasUpgrade('dark', 42)) eff = eff.times(upgradeEffect('dark', 42));
 
         //pow
         //if (inChallenge('kou', 32)) eff = eff.pow(1 + Math.random() * 0.1);
-        //if (hasChallenge('kou',32)) eff = eff.pow(1+((!hasMilestone('rei',2))?(Math.random()*0.05):0.05));
+        //if (hasChallenge('kou',32)) eff = eff.pow(1+((!hasMilestone('zero',2))?(Math.random()*0.05):0.05));
         //if (hasChallenge('kou', 32)) eff = eff.pow(challengeEffect('kou', 32));
 
         //AW
@@ -256,6 +258,7 @@ addLayer("lethe", {
         if (hasAchievement('a', 43)) node = node.plus(4);
         if (hasUpgrade('kou', 25)) node = node.plus(8);
         if (player.kou.buyables[11].gte(15)) node = node.plus(player.kou.buyables[11].floor().sub(14).min(8))
+        if (inChallenge('world', 21)) node = new Decimal(9);
         return node.toNumber()
     },
 
@@ -270,7 +273,7 @@ addLayer("lethe", {
                 str = str + "<br><br>Cost: 2500 Light Tachyons"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 22) },
+            unlocked() { return hasUpgrade("kou", 22) || hasMilestone("axium", 1) },
             style: { height: '130px', width: '130px' },
             canAfford() {
                 let a = player.light.points.gte(2500)
@@ -296,7 +299,7 @@ addLayer("lethe", {
                 str = str + "<br><br>Cost: 9000 Light Tachyons<br>Req: 15x Red Dolls effect"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 22) },
+            unlocked() { return hasUpgrade("kou", 22) || hasMilestone("axium", 1) },
             style: { height: '130px', width: '130px' },
             canAfford() {
                 let a = player.light.points.gte(9000) && tmp['kou'].effect.gte(15)
@@ -321,7 +324,7 @@ addLayer("lethe", {
                 str = str + "<br><br>Cost: 5000 Light Tachyons<br>55 Red Dolls"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 22) },
+            unlocked() { return hasUpgrade("kou", 22) || hasMilestone("axium", 1) },
             style: { height: '130px', width: '130px' },
             canAfford() {
                 let a = player.light.points.gte(5000) && player.kou.points.gte(55)
@@ -330,7 +333,7 @@ addLayer("lethe", {
             },
             pay() {
                 player.light.points = player.light.points.sub(5000);
-                player.kou.points = player.kou.points.sub(55);
+                if (!hasAchievement('a', 53)) player.kou.points = player.kou.points.sub(55);
             },
             effect() {
                 let eff = layers['kou'].effect().pow(1.5);
@@ -347,7 +350,7 @@ addLayer("lethe", {
                 str = str + "<br><br>Cost: 70 Red Dolls<br>Req: 1e25x Light Tachyons effect"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 22) },
+            unlocked() { return hasUpgrade("kou", 22) || hasMilestone("axium", 1) },
             style: { height: '130px', width: '130px' },
             canAfford() {
                 let a = player.mem.points.gte(1e70) && tmp['light'].effect.gte(1e25)
@@ -355,7 +358,7 @@ addLayer("lethe", {
                 return a && b && (layers['lethe'].BeaconLength() < tmp.lethe.nodeSlots)
             },
             pay() {
-                player.kou.points = player.kou.points.sub(70);
+                if (!hasAchievement('a', 53)) player.kou.points = player.kou.points.sub(70);
             },
             effect() {
                 let eff = player.kou.points.div(2).max(1);
@@ -372,7 +375,7 @@ addLayer("lethe", {
                 str = str + "<br><br>Cost: 50 Red Dolls"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 22) },
+            unlocked() { return hasUpgrade("kou", 22) || hasMilestone("axium", 1) },
             style: { height: '130px', width: '130px' },
             canAfford() {
                 let a = player.kou.points.gte(50)
@@ -380,7 +383,7 @@ addLayer("lethe", {
                 return a && b && (layers['lethe'].BeaconLength() < tmp.lethe.nodeSlots)
             },
             pay() {
-                player.kou.points = player.kou.points.sub(50);
+                if (!hasAchievement('a', 53)) player.kou.points = player.kou.points.sub(50);
             },
             effect() {
                 let eff = Decimal.log10(player.kou.resetTime + 1).plus(1).sqrt();
@@ -397,7 +400,7 @@ addLayer("lethe", {
                 str = str + "<br><br>Cost: 9000 Light Tachyons<br>Req: 350x Forgotten Drops effect"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 22) },
+            unlocked() { return hasUpgrade("kou", 22) || hasMilestone("axium", 1) },
             style: { height: '130px', width: '130px' },
             canAfford() {
                 let a = player.light.points.gte(9000) && tmp['lethe'].effect.gte(350)
@@ -458,7 +461,7 @@ addLayer("lethe", {
             pay() {
                 player.mem.points = player.mem.points.sub(5e65);
                 player.light.points = player.light.points.sub(900)
-                player.kou.points = player.kou.points.sub(28);
+                if (!hasAchievement('a', 53)) player.kou.points = player.kou.points.sub(28);
             },
             effect() {
                 let eff = player.kou.points.div(1.5).max(1);
@@ -484,7 +487,7 @@ addLayer("lethe", {
             },
             pay() {
                 player.mem.points = player.mem.points.sub(1e90);
-                player.kou.points = player.kou.points.sub(42)
+                if (!hasAchievement('a', 53)) player.kou.points = player.kou.points.sub(42)
             },
             effect() {
                 let eff = player.points.plus(1).log10().max(1).div(100).plus(1);
@@ -501,7 +504,7 @@ addLayer("lethe", {
                 str = str + "<br><br>Cost: 70 Red Dolls<br>5e22x Dark Matters effect"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 22) },
+            unlocked() { return hasUpgrade("kou", 22) || hasMilestone("axium", 1) },
             style: { height: '130px', width: '130px' },
             canAfford() {
                 let a = player.kou.points.gte(70) && tmp['dark'].effect.gte(5e22)
@@ -509,7 +512,7 @@ addLayer("lethe", {
                 return a && b && (layers['lethe'].BeaconLength() < tmp.lethe.nodeSlots)
             },
             pay() {
-                player.kou.points = player.kou.points.sub(70);
+                if (!hasAchievement('a', 53)) player.kou.points = player.kou.points.sub(70);
             },
             effect() {
                 let eff = player.kou.points.div(2).max(1);
@@ -526,7 +529,7 @@ addLayer("lethe", {
                 str = str + "<br><br>Cost: 5000 Light Tachyons<br>1e65 Forgotten Drops"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 22) },
+            unlocked() { return hasUpgrade("kou", 22) || hasMilestone("axium", 1) },
             style: { height: '130px', width: '130px' },
             canAfford() {
                 let a = player.lethe.points.gte(1e65) && player.light.points.gte(5000)
@@ -605,7 +608,7 @@ addLayer("lethe", {
             pay() {
                 player.mem.points = player.mem.points.sub(5e65);
                 player.dark.points = player.dark.points.sub(800)
-                player.kou.points = player.kou.points.sub(28);
+                if (!hasAchievement('a', 53)) player.kou.points = player.kou.points.sub(28);
             },
             effect() {
                 if (player.light.points.lte(player.dark.points)) return new Decimal(1);
@@ -622,7 +625,7 @@ addLayer("lethe", {
                 str = str + "<br><br>Cost: 4500 Dark Matters<br>55 Red Dolls"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 22) },
+            unlocked() { return hasUpgrade("kou", 22) || hasMilestone("axium", 1) },
             style: { height: '130px', width: '130px' },
             canAfford() {
                 let a = player.dark.points.gte(4500) && player.kou.points.gte(55)
@@ -631,7 +634,7 @@ addLayer("lethe", {
             },
             pay() {
                 player.dark.points = player.dark.points.sub(4500);
-                player.kou.points = player.kou.points.sub(55);
+                if (!hasAchievement('a', 53)) player.kou.points = player.kou.points.sub(55);
             },
             effect(){
                 return layers['kou'].effect().pow(1.5);
@@ -647,7 +650,7 @@ addLayer("lethe", {
                 str = str + "<br><br>Cost: 1e97 Forgotten Drops<br>Req: 1e25 Light Tachyons effect"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 22) },
+            unlocked() { return hasUpgrade("kou", 22) || hasMilestone("axium", 1) },
             style: { height: '130px', width: '130px' },
             canAfford() {
                 let a = player.lethe.points.gte(1e97) && tmp['light'].effect.gte(1e25)
@@ -754,7 +757,7 @@ addLayer("lethe", {
                 str = str + "<br><br>Cost: 8000 Dark Matters<br>Req: 15x Red Dolls effect"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 22) },
+            unlocked() { return hasUpgrade("kou", 22) || hasMilestone("axium", 1) },
             style: { height: '130px', width: '130px' },
             canAfford() {
                 let a = player.dark.points.gte(8000) && tmp['kou'].effect.gte(15)
@@ -779,7 +782,7 @@ addLayer("lethe", {
                 str = str + "<br><br>Cost: 5e55 Forgotten Drops"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 22) },
+            unlocked() { return hasUpgrade("kou", 22) || hasMilestone("axium", 1) },
             style: { height: '130px', width: '130px' },
             canAfford() {
                 let a = player.lethe.points.gte(5e55)
@@ -804,7 +807,7 @@ addLayer("lethe", {
                 str = str + "<br><br>Cost: 1e97 Forgotten Drops<br>Req: 5e22 Dark Matters effect"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 22) },
+            unlocked() { return hasUpgrade("kou", 22) || hasMilestone("axium", 1) },
             style: { height: '130px', width: '130px' },
             canAfford() {
                 let a = player.lethe.points.gte(1e97) && tmp['dark'].effect.gte(5e22)
@@ -829,7 +832,7 @@ addLayer("lethe", {
                 str = str + "<br><br>Cost: 4500 Dark Matters<br>1e65 Forgotten Drops"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 22) },
+            unlocked() { return hasUpgrade("kou", 22) || hasMilestone("axium", 1) },
             style: { height: '130px', width: '130px' },
             canAfford() {
                 let a = player.dark.points.gte(4500) && player.lethe.points.gte(1e65)
@@ -855,7 +858,7 @@ addLayer("lethe", {
                 str = str + "<br><br>Cost: 8000 Dark Matters<br>Req: 350x Forgotten Drops effect"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 22) },
+            unlocked() { return hasUpgrade("kou", 22) || hasMilestone("axium", 1) },
             style: { height: '130px', width: '130px' },
             canAfford() {
                 let a = player.dark.points.gte(8000) && tmp['lethe'].effect.gte(350)
@@ -880,7 +883,7 @@ addLayer("lethe", {
                 str = str + "<br><br>Cost: 2250 Dark Matters"
                 return str;
             },
-            unlocked() { return hasUpgrade("kou", 22) },
+            unlocked() { return hasUpgrade("kou", 22) || hasMilestone("axium", 1) },
             style: { height: '130px', width: '130px' },
             canAfford() {
                 let a = player.dark.points.gte(2250)

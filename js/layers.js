@@ -45,12 +45,17 @@ addLayer("mem", {
         if (hasUpgrade('lethe', 32) || hasUpgrade('lethe', 43)) mult = mult.times(tmp.lethe.effect);
         if (hasUpgrade('lethe', 23)) mult = mult.times(upgradeEffect('lethe', 23));
         if (hasUpgrade('lethe', 34)) mult = mult.times(upgradeEffect('lethe', 34));
+        if (hasMilestone('lab', 2)) mult = mult.times(player.lab.power.div(10).max(1));
+        if (hasUpgrade('story', 12)) mult = mult.times(tmp["zero"].challenges[11].effecttoFragMem);
+
+        if (inChallenge('zero', 11)) mult = mult.pow(0.5);
 
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
         let exp = new Decimal(1)
         if (hasUpgrade('mem', 13)) exp = exp.times(upgradeEffect('mem', 13));
+        if (hasUpgrade('lab', 74)) exp = exp.plus(buyableEffect('lab', 13).eff1());
         return exp
     },
     row: 0, // Row the layer is in on the tree (0 is the first row)
@@ -63,18 +68,34 @@ addLayer("mem", {
         if (hasMilestone('light', 3)) pg = pg + 0.1;
         if (hasMilestone('dark', 3)) pg = pg + 0.1;
         if (hasAchievement('a', 35)) pg = pg + 0.3;
+        if (inChallenge('world', 11)) pg = -0.005;
         return pg;
     },
+    update(diff) {
+        if (player.points.lt(1)) player.points = new Decimal(1);
+        if (player.mem.points.lt(1)) player.mem.points = new Decimal(1);
+    },
+    tabFormat:
+    ["main-display",
+        "prestige-button",
+        "resource-display",
+        ["display-text",
+            function () { if (player.lab.unlocked) return "Currently, Memory softcap is:" + format(tmp["mem"].softcap) },
+            {}],
+        "blank",
+        "upgrades",
+    ],
     doReset(resettingLayer) {
         let keep = [];
         if (layers[resettingLayer].row > this.row) {
             layerDataReset("mem", keep);
             if (hasAchievement("a", 14)) player[this.layer].upgrades = player[this.layer].upgrades.concat([24]);
-            if (hasAchievement("a", 21)) player[this.layer].upgrades = player[this.layer].upgrades.concat([41]);
+            if (hasAchievement("a", 24)) player[this.layer].upgrades = player[this.layer].upgrades.concat([41]);
+            if (hasAchievement("a", 45)) player[this.layer].upgrades = player[this.layer].upgrades.concat([42]);
             if (hasMilestone('light', 0)) player[this.layer].upgrades = player[this.layer].upgrades.concat([11, 12, 13, 14]);
             if (hasMilestone('dark', 0)) player[this.layer].upgrades = player[this.layer].upgrades.concat([21, 22, 23]);
-            if (hasMilestone('dark', 2)) player[this.layer].upgrades = player[this.layer].upgrades.concat([31, 32]);
-            if (hasMilestone('light', 2)) player[this.layer].upgrades = player[this.layer].upgrades.concat([33, 34]);
+            if (hasMilestone('light', 2)) player[this.layer].upgrades = player[this.layer].upgrades.concat([31, 32]);
+            if (hasMilestone('dark', 2)) player[this.layer].upgrades = player[this.layer].upgrades.concat([33, 34]);
             if (hasAchievement("a", 13) && (resettingLayer != 'mem')) player[this.layer].points = new Decimal(5);
             if (hasAchievement("a", 41) && (resettingLayer != 'mem')) player[this.layer].points = new Decimal(100);
         }
@@ -160,7 +181,7 @@ addLayer("mem", {
             title: "Directly Drown",
             description: "Memories gain is boosted by Fragments.",
             cost() { return new Decimal(1e11) },
-            unlocked() { return (hasUpgrade("mem", 23) && hasAchievement("a", 15)) || hasMilestone("dark", 2) },
+            unlocked() { return (hasUpgrade("mem", 23) && hasAchievement("a", 15)) || hasMilestone("light", 2) },
             effect() {
                 return player.points.plus(1).pow(0.05).plus(1).log10().plus(2).log(5).plus(1).max(1);
             },
@@ -169,7 +190,7 @@ addLayer("mem", {
             title: "Thought Growth",
             description: "Thought Combination is boosted by Memories.",
             cost() { return new Decimal(1e12) },
-            unlocked() { return hasUpgrade("mem", 31) || hasMilestone("dark", 2) },
+            unlocked() { return hasUpgrade("mem", 31) || hasMilestone("light", 2) },
             effect() {
                 return player[this.layer].points.plus(1).log10().pow(0.5).log(2).max(1);
             },
@@ -178,7 +199,7 @@ addLayer("mem", {
             title: "Memory Inflation",
             description: "Memory Extraction is much faster.",
             cost() { return new Decimal(5e12) },
-            unlocked() { return hasUpgrade("mem", 32) || hasMilestone("light", 2) },
+            unlocked() { return hasUpgrade("mem", 32) || hasMilestone("dark", 2) },
         },
         34: {
             title: "The Thread of Two Sides",
@@ -186,11 +207,11 @@ addLayer("mem", {
                 let str = "Light Talcyons and Dark Matters boost each other's gain slightly based on their "
                 if (hasMilestone("kou", 1)) str = str + "sum."
                 else str = str + "average."
-                str = str + "<br>Currently: " + format(upgradeEffect('mem', 34)) + "x";
+                //str = str + "<br>Currently: " + format(upgradeEffect('mem', 34)) + "x";
                 return str
             },
             cost() { return new Decimal(1e13) },
-            unlocked() { return hasUpgrade("mem", 33) || hasMilestone("light", 2) },
+            unlocked() { return hasUpgrade("mem", 33) || hasMilestone("dark", 2) },
             effect() {
                 let eff = player.light.points.plus(player.dark.points).plus(2)
                 if (!hasMilestone("kou", 1)) eff = eff.div(2)
@@ -206,15 +227,33 @@ addLayer("mem", {
             fullDisplay() {
                 let str = "<b>Eternal Core</b><br>"
                 if (hasAchievement('a', 24)) str = str + "A core built of masses of Memories, with a few Lightness and bits of Darkness. It contains nearly endless energy."
-                else str = str + "Build up a core which symbolizes your current progress and unlock two layers."
-                str = str + "<br>Cost: 1e23 Memories<br>Req:62 Light Tachyons<br>62 Dark Matters";
+                else {
+                    str = str + "Build up a core which symbolizes your current progress and unlock two layers."
+                    str = str + "<br>Cost: 1e23 Memories<br>Req:62 Light Tachyons<br>62 Dark Matters";
+                }
                 return str
             },
             cost() { return new Decimal(1e23) },
             canAfford() { return player[this.layer].points.gte(1e23) && player.dark.points.gte(62) && player.light.points.gte(62) },
-            unlocked() { return hasUpgrade("light", 34) && hasUpgrade("dark", 34) || hasAchievement('a', 21) },
+            unlocked() { return hasUpgrade("light", 34) && hasUpgrade("dark", 34) || hasAchievement('a', 24) },
             style() { return { 'height': '200px', 'width': '200px' } },
             onPurchase() { doReset('kou', true); showTab('none'); player[this.layer].upgrades = [41]; },
+        },
+        42: {
+            title: "Set Up The Lab.",
+            fullDisplay() {
+                if (hasAchievement('a', 45)) return "<b>The Lab</b></br>The Lab has been set up. Now go for more professional researches."
+                return "<b>Set Up The Lab.</b></br>With the experiences and the resources you have, you are now going to set up a lab to research all these things.</br></br>Cost: 1e203 Fragments</br>92 Red Dolls</br>1e145 Forgotten Drops"
+            },
+            canAfford() { return player.points.gte(1e201) && player.kou.points.gte(92) && player.lethe.points.gte(1e145) },
+            pay() {
+                player.points = player.points.sub(1e201);
+                player.kou.points = player.kou.points.sub(92);
+                player.lethe.points = player.lethe.points.sub(1e145);
+            },
+            unlocked() { return player.lethe.upgrades.length >= 25 && hasUpgrade('kou', 25) },
+            style() { return { 'height': '200px', 'width': '200px' } },
+            onPurchase() { showTab('none'); player.lab.unlocked = true; player.lab.points = new Decimal(1); player[this.layer].upgrades.concat([42]);},
         },
     },
 })
@@ -248,6 +287,36 @@ addLayer("ab", {
             canClick() { return hasMilestone('lethe', 3) },
             onClick() { player.dark.auto = !player.dark.auto },
             style: { "background-color"() { return player.dark.auto ? "#383838" : "#666666" } },
+        },
+        13: {
+            title: "Red Dolls",
+            display() {
+                return hasUpgrade('lab', 71) ? (player.kou.auto ? "On" : "Off") : "Locked"
+            },
+            unlocked() { return tmp["kou"].layerShown && hasAchievement('lab', 21) },
+            canClick() { return hasUpgrade('lab', 71) },
+            onClick() { player.kou.auto = !player.kou.auto },
+            style: { "background-color"() { return player.kou.auto ? "#ffa0be" : "#666666" } },
+        },
+        13: {
+            title: "Red Dolls",
+            display() {
+                return hasUpgrade('lab', 71) ? (player.kou.auto ? "On" : "Off") : "Locked"
+            },
+            unlocked() { return tmp["kou"].layerShown && hasAchievement('lab', 21) },
+            canClick() { return hasUpgrade('lab', 71) },
+            onClick() { player.kou.auto = !player.kou.auto },
+            style: { "background-color"() { return player.kou.auto ? "#ffa0be" : "#666666" } },
+        },
+        14: {
+            title: "Research Generator & Tech Transformer",
+            display() {
+                return (hasUpgrade('lab', 122)) ? (player.lab.generatorauto ? "On" : "Off") : "Locked"
+            },
+            unlocked() { return hasChallenge('world', 11) },
+            canClick() { return hasUpgrade('lab', 122) },
+            onClick() { player.lab.generatorauto = !player.lab.generatorauto },
+            style: { "background-color"() { return player.lab.generatorauto ? "#00bdf9" : "#666666" } },
         },
     },
 })
