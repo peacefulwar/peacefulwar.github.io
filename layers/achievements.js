@@ -168,7 +168,7 @@ addLayer("a", {
                 if (player['zero'].roses.lte(0)) return new Decimal(1);
                 let eff = player.zero.roses.plus(1).log10().plus(1);
                 if (hasAchievement('a', 75)) eff = player.zero.roses.plus(1).log(7.5).plus(1);
-                //if (hasAchievement('a', 93)) eff = eff.times(tmp.etoluna.starPointeffect);
+                if (hasAchievement('a', 92)) eff = eff.times(tmp.etoluna.starPointeffect);
                 //if (hasUpgrade('lethe', 63)) eff = eff.times(upgradeEffect('lethe', 63));
                 //if (hasUpgrade('lethe', 64)) eff = eff.times(upgradeEffect('lethe', 64));
                 //if (hasUpgrade('lethe', 65)) eff = eff.times(upgradeEffect('lethe', 65));
@@ -214,7 +214,7 @@ addLayer("a", {
         },
         81: {
             name: "\"Currently, nothing here.\"",
-            done() { return player.story.unlocked },
+            done() { return player.storylayer.unlocked },
             tooltip: "Begin Your stories.",
         },
         82: {
@@ -230,9 +230,72 @@ addLayer("a", {
         84: {
             name: "Lossy Move",
             done() { return player.axium.timesmoved.gte(100) },
-            tooltip: "Move more than 100 times in the Maze<br>Rewards:You can choose all four directions in Maze.",
+            tooltip: "Move more than 100 times in the Maze.<br>Rewards:You can choose all four directions in Maze.",
         },
-
+        85: {
+            name: "Building Group",
+            done() { return player.zero.points.gte(10) && player.axium.points.gte(10) },
+            tooltip: "Gain both 10 Luminous Churches & Flourish Labyrinths.<br>Rewards:Stories you have gone through boost Fragments generation.",
+            effect() {
+                return player.storylayer.points.plus(1);
+            },
+        },
+        91: {
+            name: "World Edge",
+            done() { return player.etoluna.unlocked || player.saya.unlocked },
+            tooltip: "Perform a row 5 reset.<br>Rewards:Your going on different world steps is now automated.",
+        },
+        92: {
+            name: "\"Oh, No. Another BA.\"",
+            done() { return player.etoluna.starPoint.gte(250) && player.etoluna.moonPoint.gte(250) },
+            tooltip: "Gain both 250 Star Points & Moon Points.<br>Rewards:Unlock their buffs.",
+            //style:{'background-position':'center'}
+        },
+        93: {
+            name: "Being others",
+            done() { return challengeCompletions('saya', 11) >= 1 },
+            tooltip: "Complete Memory Adjustment Challenge once.<br>Rewards:Keep World Maps when reset, and you gain moves in maze 2x.",
+        },
+        94: {
+            name: "Suspicious Spots",
+            done() { return player.saya.unlocked && player.etoluna.unlocked },
+            tooltip: "Unlock both Gemini & Knives Layers.<br>Rewards:You keep your World Atlas when reset.",
+        },
+        95: {
+            name: "Not Too Much",
+            done() { return layers.world.restrictReward().gte(150) },
+            tooltip: "Reach the Restriction Steps Rewards' hardcap.",
+        },
+        101: {
+            name: "\"I told you it's useless\"",
+            done() { return (inChallenge('saya', 41) /*|| (player.saya.CurrentPairChallenge!=null && tmp.saya.grid.ChallengeDepth[7]!=-1)*/) && inChallenge('zero', 11) },
+            tooltip: "Enter Zero Sky while in Otherside of Godess Challenge.<br>Rewards:Everflashing Knives also effect Glowing roses Gain.",
+        },
+        102: {
+            name: "Hypersense",
+            done() { return player.etoluna.points.gte(1000) },
+            tooltip: "Gain 1000 Gemini Bounds.<br>Rewards:Gemini Bounds give more speed on Star/Moon Points gaining.",
+        },
+        103: {
+            name: "Seriously?",
+            done() { return player.axium.timesmoved.gte(1000000) },
+            tooltip: "Have more than 1,000,000 times moved in Maze.",
+        },
+        104: {
+            name: "Fully Mastery",
+            done() { return hasUpgrade('etoluna', 23) && hasUpgrade('etoluna', 24) && challengeCompletions('saya', 42) >= 5 },
+            tooltip: "Buy all Gemini Upgrades and Finish the last Memory Adjustment.<br>Rewards: Unlock a new World Map, but you still need to push world step to take the challenge.",
+        },
+        105: {
+            name: "\"Did I just see an NaN?\"",
+            done() { return (challengeCompletions('saya', 42) >= 5) && (inChallenge('saya', 42)||(player.saya.CurrentPairChallenge!=null && tmp.saya.grid.ChallengeDepth[8]>=5)) && player.tab == 'light' },
+            tooltip: "See an NaN which won't break the game.",
+        },
+        111: {
+            name: "Fragmental Industry",
+            done() { return player.lib.unlocked },
+            tooltip: "Perform a row 6 reset.<br>Rewards:You lose Research Power and overflowing Research Point 0.1% per second instead of 1%, and keep 10 Light Tachyons & Dark Matters when reset.",
+        },
     },
     tabFormat: [
         "blank",

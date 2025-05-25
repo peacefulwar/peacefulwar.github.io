@@ -119,9 +119,10 @@ addLayer("axium", {
         if (hasChallenge('world', 21)) mult = mult.div(challengeEffect('world', 21));
         if (hasAchievement('a', 71)) mult = mult.div(layers.world.fixedReward());
         if (hasUpgrade('lab', 144)) mult = mult.div(upgradeEffect('lab', 144));
-        //if (hasUpgrade('story', 32)) mult = mult.div(upgradeEffect('story', 32));
-        //if (hasUpgrade('lab', 163)) mult = mult.div(buyableEffect('lab', 33));
-        //if (hasMilestone('ins', 1)) mult = mult.div(layers.ins.insEffect().Deu().Pos());
+        if (hasUpgrade('storylayer', 32)) mult = mult.div(upgradeEffect('storylayer', 32));
+        if (hasUpgrade('lab', 163)) mult = mult.div(buyableEffect('lab', 33));
+        if (hasMilestone('lib', 1)) mult = mult.div(layers.lib.libEffect().shirabe());
+        if (hasMilestone('lib', 2)) mult = mult.div(layers.lib.libEffect().summer());
         //if (player['awaken'].current == 'zero'||player['awaken'].awakened.includes('zero')) mult = mult.div(tmp["zero"].challenges[11].effectAWtoLCFL);
         //if (player['awaken'].current == 'axium'||player['awaken'].awakened.includes('axium')) mult = mult.div(tmp['axium'].AWeffect.SEeffect); 
         //if (player.fracture.unlocked){
@@ -140,11 +141,10 @@ addLayer("axium", {
     layerShown() { return hasAchievement('lab', 21) || player[this.layer].unlocked },
     autoPrestige() {
         //if (layers['axium'].deactivated()) return false;
-        //return (hasMilestone('saya', 3) && player.axium.auto)
-        return false
+        return (hasMilestone('saya', 3) && player.axium.auto)
     },
-    canBuyMax() { return false /*hasMilestone('saya', 4)||player['awaken'].current == 'axium'||player['awaken'].current == 'zero'||player['awaken'].current == 'zero'||player['awaken'].current == 'etoluna'||player['awaken'].current == 'saya'*/ },
-    resetsNothing() { return false /*hasMilestone('saya', 5)*/ },
+    canBuyMax() { return hasMilestone('saya', 4) /*|| player['awaken'].current == 'axium' || player['awaken'].current == 'zero' || player['awaken'].current == 'zero' || player['awaken'].current == 'etoluna' || player['awaken'].current == 'saya'*/ },
+    resetsNothing() { return hasMilestone('saya', 5) },
 
     milestones: {
         0: {
@@ -157,7 +157,7 @@ addLayer("axium", {
             requirementDescription: "2 total Flourish Labyrinths",
             done() { return player.axium.total.gte(2) },
             unlocked() { return player.axium.unlocked },
-            effectDescription: "Keep last milestones of Forgotten Drop Layer when LC or FL reset, and now Guiding Scythes are auto bought.",
+            effectDescription: "Keep last milestones of Forgotten Drop Layer when LC or FL reset.",
         },
         2: {
             requirementDescription: "5 total Flourish Labyrinths",
@@ -188,7 +188,7 @@ addLayer("axium", {
 
     shouldNotify() {
         let buyableid = [11, 21, 22, 31];
-        //if (hasUpgrade("story", 15)) return false;
+        if (hasUpgrade("storylayer", 15)) return false;
         for (var i = 0; i < buyableid.length; i++) {
             if (tmp.axium.buyables[buyableid[i]].canAfford) {
                 return true;
@@ -222,9 +222,9 @@ addLayer("axium", {
 
     doReset(resettingLayer) {
         let keep = [];
-        //if (hasMilestone('etoluna', 1) || hasMilestone('saya', 1)) keep.push("milestones");
-        //if (hasMilestone('saya', 3) || (resettingLayer == 'awaken' && player['awaken'].current == null)) keep.push("auto");
-        /*if (layers[resettingLayer].row > this.row) {
+        if (hasMilestone('etoluna', 1) || hasMilestone('saya', 1)) keep.push("milestones");
+        if (hasMilestone('saya', 3) /*|| (resettingLayer == 'awaken' && player['awaken'].current == null)*/) keep.push("auto");
+        if (layers[resettingLayer].row > this.row) {
             layerDataReset('axium', keep);
             let keepmilestone = [];
             if (hasMilestone('etoluna', 0)) { keepmilestone = keepmilestone.concat([0]); player[this.layer].total = player[this.layer].total.plus(3) }
@@ -233,7 +233,7 @@ addLayer("axium", {
                 if (!hasMilestone('axium', keepmilestone[i])) player.axium.milestones.push(keepmilestone[i]);
                 if (keepmilestone[i] = 3) player.axium.canclickingclickables = layers.axium.canclickingclickables(layers.axium.DirectioncanChoose());
             }
-        }*/
+        }
     },
 
 
@@ -266,10 +266,10 @@ addLayer("axium", {
         if (hasAchievement('a', 64)) mt = mt.plus(5);
         if (hasUpgrade('lab', 114)) mt = mt.plus(upgradeEffect('lab', 114));
         if (hasUpgrade('lab', 142)) mt = mt.plus(upgradeEffect('lab', 142));
-        //if (hasMilestone('saya', 2)) mt = mt.plus(10);
-        //if (hasUpgrade('lab', 182)) mt = mt.plus(upgradeEffect('lab', 182));
+        if (hasMilestone('saya', 2)) mt = mt.plus(10);
+        if (hasUpgrade('lab', 182)) mt = mt.plus(upgradeEffect('lab', 182));
 
-        //if (hasAchievement('a', 94)) mt = mt.times(2);
+        if (hasAchievement('a', 93)) mt = mt.times(2);
         //if (hasUpgrade('dark', 43)) mt = mt.times(upgradeEffect('dark', 43));
         //if(player.tempest.grid[102].activated) mt = mt.times(gridEffect('tempest',102));
 
@@ -284,7 +284,7 @@ addLayer("axium", {
 
     actionpoint() {//use tmp && !use Decimal && use layers when call
         let ap = 1;
-        //if (hasUpgrade('story', 15)) ap = 4;
+        if (hasUpgrade('storylayer', 15)) ap = 4;
         return ap;
     },
 
@@ -314,7 +314,7 @@ addLayer("axium", {
                 let eff = player.axium.buyables[this.id].div(2).plus(1);
                 if (hasUpgrade('lab', 131)) eff = player.axium.buyables[this.id].div(1.5).plus(1);
                 eff = eff.times(buyableEffect('axium', 22));
-                //if (hasMilestone('ins', 1)) eff = eff.times(layers.ins.insEffect().Deu().Pos());
+                if (hasMilestone('lib', 1)) eff = eff.times(layers.lib.libEffect().shirabe());
                 //if (hasUpgrade('lethe', 81)) eff = eff.times(upgradeEffect('lethe', 81));
                 //if (hasUpgrade('lethe', 91)) eff = eff.times(upgradeEffect('lethe', 91));
                 //if (hasUpgrade('lethe', 101)) eff = eff.times(upgradeEffect('lethe', 101));
@@ -328,8 +328,7 @@ addLayer("axium", {
 
                 return eff;
             },
-            autoed() { return false },
-            //autoed() { return hasUpgrade('story', 15) },
+            autoed() { return hasUpgrade('storylayer', 15) },
             style: { width: "100px", height: "100px" },
         },
         21: {
@@ -355,7 +354,7 @@ addLayer("axium", {
                 let eff = player.axium.buyables[this.id].div(20).plus(1);
                 if (hasUpgrade('lab', 133)) eff = player.axium.buyables[this.id].div(10).plus(1);
                 eff = eff.times(buyableEffect('axium', 22));
-                //if (hasMilestone('ins', 1)) eff = eff.times(layers.ins.insEffect().Deu().Pos());
+                if (hasMilestone('lib', 1)) eff = eff.times(layers.lib.libEffect().shirabe());
                 //if (hasUpgrade('lethe', 81)) eff = eff.times(upgradeEffect('lethe', 81));
                 //if (hasUpgrade('lethe', 91)) eff = eff.times(upgradeEffect('lethe', 91));
                 //if (hasUpgrade('lethe', 101)) eff = eff.times(upgradeEffect('lethe', 101));
@@ -369,8 +368,7 @@ addLayer("axium", {
 
                 return eff;
             },
-            autoed() { return false },
-            //autoed() { return hasUpgrade('story', 15) },
+            autoed() { return hasUpgrade('storylayer', 15) },
             style: { width: "100px", height: "100px" },
         },
         22: {
@@ -395,7 +393,7 @@ addLayer("axium", {
             effect() {
                 let eff = player.axium.buyables[this.id].div(50).plus(1);
                 if (hasUpgrade('lab', 132)) eff = player.axium.buyables[this.id].div(25).plus(1);
-                //if (hasMilestone('ins', 1)) eff = eff.times(layers.ins.insEffect().Deu().Pos());
+                if (hasMilestone('lib', 1)) eff = eff.times(layers.lib.libEffect().shirabe());
                 //if (hasUpgrade('lethe', 81)) eff = eff.times(upgradeEffect('lethe', 81));
                 //if (hasUpgrade('lethe', 91)) eff = eff.times(upgradeEffect('lethe', 91));
                 //if (hasUpgrade('lethe', 101)) eff = eff.times(upgradeEffect('lethe', 101));
@@ -409,8 +407,7 @@ addLayer("axium", {
 
                 return eff;
             },
-            autoed() { return false },
-            //autoed() { return hasUpgrade('story', 15) },
+            autoed() { return hasUpgrade('storylayer', 15) },
             style: { width: "100px", height: "100px" },
         },
         31: {
@@ -436,7 +433,7 @@ addLayer("axium", {
                 let eff = player.axium.buyables[this.id].div(5).plus(1);
                 if (hasUpgrade('lab', 134)) eff = player.axium.buyables[this.id].div(4).plus(1);
                 eff = eff.times(buyableEffect('axium', 22));
-                //if (hasMilestone('ins', 1)) eff = eff.times(layers.ins.insEffect().Deu().Pos());
+                if (hasMilestone('lib', 1)) eff = eff.times(layers.lib.libEffect().shirabe());
                 //if (hasUpgrade('lethe', 81)) eff = eff.times(upgradeEffect('lethe', 81));
                 //if (hasUpgrade('lethe', 91)) eff = eff.times(upgradeEffect('lethe', 91));
                 //if (hasUpgrade('lethe', 101)) eff = eff.times(upgradeEffect('lethe', 101));
@@ -450,8 +447,7 @@ addLayer("axium", {
 
                 return eff;
             },
-            autoed() { return false },
-            //autoed() { return hasUpgrade('story', 15) },
+            autoed() { return hasUpgrade('storylayer', 15) },
             style: { width: "100px", height: "100px" },
         },
     },

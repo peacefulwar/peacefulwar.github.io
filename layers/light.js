@@ -45,6 +45,10 @@ addLayer("light", {
         if (hasUpgrade('lethe', 32)) mult = mult.div(upgradeEffect('lethe', 32));
         if (hasMilestone('lab', 3)) mult = mult.div(player.lab.power.div(10).max(1));
         if (hasUpgrade('lab', 83)) mult = mult.div(buyableEffect('lab', 21));
+        if (hasUpgrade('storylayer', 21)) mult = mult.div(tmp["zero"].challenges[11].effecttoLD);
+        if (hasUpgrade('storylayer', 22)) mult = mult.div(player.zero.points.div(2).max(1));
+        if (inChallenge('saya', 42) || tmp['saya'].grid.ChallengeDepth[8]>-1) mult = mult.times(tmp["dark"].effect.log(layers.saya.challenges[42].debuff()));
+        if (hasMilestone('lib', 1)) mult = mult.div(layers.lib.libEffect().ayu());
         return mult;
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -54,14 +58,15 @@ addLayer("light", {
     },
 
     update(diff) {
-        player.light.auto = true;
+        //player.light.auto = true;
     },
 
     directMult() {
         let dm = new Decimal(1);
         if (player.kou.unlocked) dm = dm.times(tmp.kou.effect);
-        if (inChallenge('world', 12)) dm = dm.times(10);
-        else if (hasChallenge('world', 12)) dm = dm.times(5);
+        if (inChallenge('world', 12) || hasChallenge('world', 12)) dm = dm.times(5);
+        if (inChallenge('world', 12)) dm = dm.times(2);
+        if (inChallenge('saya', 42) || tmp['saya'].grid.ChallengeDepth[8]>-1) dm = dm.div(tmp["dark"].effect.log(layers.saya.challenges[42].debuff()));
         
         return dm;
     },
@@ -126,6 +131,7 @@ addLayer("light", {
             if (hasMilestone('kou', 0)) player[this.layer].milestones = player[this.layer].milestones.concat([0, 2]);
             if (hasMilestone('kou', 2)) player[this.layer].upgrades = player[this.layer].upgrades.concat([11, 12, 13, 14, 21, 22, 23, 24, 31, 32, 33, 34]);
             if (hasMilestone('kou', 4)) player[this.layer].milestones = player[this.layer].milestones.concat([1, 3]);
+            if (hasAchievement("a", 111) && (resettingLayer != 'light')) player[this.layer].points = new Decimal(10);
             //if (hasMilestone('kou', 2) && (player['awaken'].current == 'kou' || player['awaken'].awakened.includes('kou'))) player[this.layer].upgrades = player[this.layer].upgrades.concat([41, 42, 43, 44]);
         }
 
@@ -148,8 +154,11 @@ addLayer("light", {
         if (hasUpgrade('lethe', 14)) eff = eff.times(upgradeEffect('lethe', 14));
         if (hasUpgrade('lethe', 31)) eff = eff.times(upgradeEffect('lethe', 31));
         if (hasUpgrade('lethe', 41)) eff = eff.times(upgradeEffect('lethe', 41));
+        if (challengeCompletions('saya', 11) /*&& !layers['saya'].deactivated()*/) eff = eff.times(challengeEffect('saya', 11));
+        if (hasUpgrade('lab', 164)) eff = eff.times(buyableEffect('lab', 21).div(10).max(1));
         
-        if (player.world.randomChallenge && !hasUpgrade('story', 13)) eff = eff.pow(Math.random())
+        if (player.world.randomChallenge && !hasUpgrade('storylayer', 13)) eff = eff.pow(Math.random())
+        if (inChallenge('saya', 11) || tmp['saya'].grid.ChallengeDepth[1]>-1) eff = eff.pow(layers.saya.challenges[11].debuff());
         if (eff.lt(1)) return new Decimal(1);
         return eff;
     },

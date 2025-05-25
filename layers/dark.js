@@ -44,6 +44,9 @@ addLayer("dark", {
         if (hasUpgrade('lethe', 34)) mult = mult.div(upgradeEffect('lethe', 34));
         if (hasMilestone('lab', 4)) mult = mult.div(player.lab.power.div(10).max(1));
         if (hasUpgrade('lab', 84)) mult = mult.div(buyableEffect('lab', 22));
+        if (hasUpgrade('storylayer', 21)) mult = mult.div(tmp["zero"].challenges[11].effecttoLD);
+        if (hasUpgrade('storylayer', 22)) mult = mult.div(player.axium.points.div(2).max(1));
+        if (hasMilestone('lib', 1)) mult = mult.div(layers.lib.libEffect().shirabe());
         return mult;
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -125,6 +128,7 @@ addLayer("dark", {
             if (hasMilestone('lethe', 0)) player[this.layer].milestones = player[this.layer].milestones.concat([0, 2]);
             if (hasMilestone('lethe', 2)) player[this.layer].upgrades = player[this.layer].upgrades.concat([11, 12, 13, 14, 21, 22, 23, 24, 31, 32, 33, 34]);
             if (hasMilestone('lethe', 4)) player[this.layer].milestones = player[this.layer].milestones.concat([1, 3]);
+            if (hasAchievement("a", 111) && (resettingLayer != 'dark')) player[this.layer].points = new Decimal(10);
             //if (hasMilestone('kou', 2) && (player['awaken'].current == 'kou' || player['awaken'].awakened.includes('kou'))) player[this.layer].upgrades = player[this.layer].upgrades.concat([41, 42, 43, 44]);
         }
     },
@@ -147,8 +151,12 @@ addLayer("dark", {
         if (hasUpgrade('lethe', 52)) eff = eff.times(upgradeEffect('lethe', 52));
         if (hasUpgrade('lethe', 53)) eff = eff.times(upgradeEffect('lethe', 53));
         if (hasUpgrade('lethe', 55)) eff = eff.times(upgradeEffect('lethe', 55));
+        if (challengeCompletions('saya', 12) /*&& !layers['saya'].deactivated()*/) eff = eff.times(challengeEffect('saya', 12));
+        if (hasUpgrade('lab', 164)) eff = eff.times(buyableEffect('lab', 22).div(10).max(1));
+        if (challengeCompletions('saya', 42) /*&& !layers['saya'].deactivated()*/) mult = mult.div(challengeEffect('saya', 42));
         
-        if (player.world.randomChallenge && !hasUpgrade('story', 13)) eff = eff.pow(Math.random())
+        if (player.world.randomChallenge && !hasUpgrade('storylayer', 13)) eff = eff.pow(Math.random())
+        if (inChallenge('saya', 12) || tmp['saya'].grid.ChallengeDepth[2]>-1) eff = eff.pow(layers.saya.challenges[12].debuff());
 
         if (eff.lt(1)) return new Decimal(1);
         return eff;

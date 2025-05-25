@@ -20,8 +20,9 @@ addLayer("mem", {
         if (hasUpgrade('dark', 32)) sc = sc.times(upgradeEffect('dark', 32));
         if (hasAchievement('a', 24)) sc = sc.times(player.points.plus(1).log10().plus(1));
         if (hasMilestone('lethe', 1)) sc = sc.times(upgradeEffect('mem', 34));
-        if (hasUpgrade('kou', 11)) sc = sc.times(buyableEffect('kou',11));
-        if (hasUpgrade('lethe', 22)) sc = sc.times(upgradeEffect('lethe',22));
+        if (hasUpgrade('kou', 11)) sc = sc.times(buyableEffect('kou', 11));
+        if (hasUpgrade('lethe', 22)) sc = sc.times(upgradeEffect('lethe', 22));
+        if (challengeCompletions('saya', 22) /*&& !layers['saya'].deactivated()*/) sc = sc.times(challengeEffect('saya', 22));
         return sc;
     },
     softcapPower() {
@@ -46,9 +47,13 @@ addLayer("mem", {
         if (hasUpgrade('lethe', 23)) mult = mult.times(upgradeEffect('lethe', 23));
         if (hasUpgrade('lethe', 34)) mult = mult.times(upgradeEffect('lethe', 34));
         if (hasMilestone('lab', 2)) mult = mult.times(player.lab.power.div(10).max(1));
-        if (hasUpgrade('story', 12)) mult = mult.times(tmp["zero"].challenges[11].effecttoFragMem);
+        if (hasUpgrade('storylayer', 12)) mult = mult.times(tmp["zero"].challenges[11].effecttoFragMem);
 
         if (inChallenge('zero', 11)) mult = mult.pow(0.5);
+        if (player.world.restrictChallenge && !hasUpgrade('storylayer', 14)) mult = mult.pow(0.9);
+
+        
+        if (inChallenge('saya', 22) || tmp['saya'].grid.ChallengeDepth[4]>-1) mult = mult.tetrate(layers.saya.challenges[22].debuff())
 
         return mult
     },
@@ -110,6 +115,9 @@ addLayer("mem", {
                 if (hasUpgrade('mem', 21)) eff = eff.pow(upgradeEffect('mem', 21));
                 return eff;
             },
+            effectDisplay() {
+                if (hasUpgrade('lab', 174)) return "<br>Currently: " + format(upgradeEffect('mem', 11)) + "x"
+            },
         },
         12: {
             title: "Memory Extraction",
@@ -120,6 +128,9 @@ addLayer("mem", {
                 let eff = player[this.layer].points.plus(1).pow(0.25);
                 if (hasUpgrade('mem', 33)) eff = eff.pow(1.25);
                 return eff;
+            },
+            effectDisplay() {
+                if (hasUpgrade('lab', 174)) return "<br>Currently: " + format(upgradeEffect('mem', 12)) + "x"
             },
         },
         13: {
@@ -132,6 +143,9 @@ addLayer("mem", {
                 if (hasUpgrade('mem', 23)) eff = eff.pow(upgradeEffect('mem', 23));
                 return eff;
             },
+            effectDisplay() {
+                if (hasUpgrade('lab', 174)) return "<br>Currently: " + format(upgradeEffect('mem', 13)) + "x"
+            },
         },
         14: {
             title: "Fragment Duplication",
@@ -140,6 +154,9 @@ addLayer("mem", {
             unlocked() { return hasUpgrade("mem", 13) || hasMilestone("light", 0) },
             effect() {
                 return player.points.plus(1).log10().pow(0.75).plus(1).max(1);
+            },
+            effectDisplay() {
+                if (hasUpgrade('lab', 174)) return "<br>Currently: " + format(upgradeEffect('mem', 14)) + "x"
             },
         },
         21: {
@@ -152,6 +169,9 @@ addLayer("mem", {
                 if (hasUpgrade('mem', 32)) eff = eff.pow(upgradeEffect('mem', 32));
                 return eff
             },
+            effectDisplay() {
+                if (hasUpgrade('lab', 174)) return "<br>Currently: " + format(upgradeEffect('mem', 21)) + "x"
+            },
         },
         22: {
             title: "Fragment Prediction",
@@ -161,6 +181,9 @@ addLayer("mem", {
             effect() {
                 return player[this.layer].points.plus(1).pow(0.5).max(1)
             },
+            effectDisplay() {
+                if (hasUpgrade('lab', 174)) return "<br>Currently: " + format(upgradeEffect('mem', 22)) + "x"
+            },
         },
         23: {
             title: "Time Boosting",
@@ -169,6 +192,9 @@ addLayer("mem", {
             unlocked() { return hasUpgrade("mem", 22) || hasMilestone("dark", 0) },
             effect() {
                 return player.points.plus(1).times(1.5).log10().max(1).log(2).pow(0.01).plus(1).max(1);
+            },
+            effectDisplay() {
+                if (hasUpgrade('lab', 174)) return "<br>Currently: " + format(upgradeEffect('mem', 23)) + "x"
             },
         },
         24: {
@@ -185,6 +211,9 @@ addLayer("mem", {
             effect() {
                 return player.points.plus(1).pow(0.05).plus(1).log10().plus(2).log(5).plus(1).max(1);
             },
+            effectDisplay() {
+                if (hasUpgrade('lab', 174)) return "<br>Currently: " + format(upgradeEffect('mem', 31)) + "x"
+            },
         },
         32: {
             title: "Thought Growth",
@@ -193,6 +222,9 @@ addLayer("mem", {
             unlocked() { return hasUpgrade("mem", 31) || hasMilestone("light", 2) },
             effect() {
                 return player[this.layer].points.plus(1).log10().pow(0.5).log(2).max(1);
+            },
+            effectDisplay() {
+                if (hasUpgrade('lab', 174)) return "<br>Currently: " + format(upgradeEffect('mem', 32)) + "x"
             },
         },
         33: {
@@ -204,11 +236,7 @@ addLayer("mem", {
         34: {
             title: "The Thread of Two Sides",
             description() {
-                let str = "Light Talcyons and Dark Matters boost each other's gain slightly based on their "
-                if (hasMilestone("kou", 1)) str = str + "sum."
-                else str = str + "average."
-                //str = str + "<br>Currently: " + format(upgradeEffect('mem', 34)) + "x";
-                return str
+                return "Light Talcyons and Dark Matters boost each other's gain slightly based on their " + (hasMilestone('kou', 1) ? "sum." : "average.")
             },
             cost() { return new Decimal(1e13) },
             unlocked() { return hasUpgrade("mem", 33) || hasMilestone("dark", 2) },
@@ -220,7 +248,10 @@ addLayer("mem", {
                 if (hasUpgrade('light', 23)) eff = eff.times(upgradeEffect('light', 23))
                 if (hasUpgrade('dark', 23)) eff = eff.times(upgradeEffect('dark', 23))
                 return eff
-            }
+            },
+            effectDisplay() {
+                if (hasUpgrade('lab', 174)) return "<br>Currently: " + format(upgradeEffect('mem', 34)) + "x"
+            },
         },
         41: {
             title: "Eternal Core",
@@ -271,40 +302,45 @@ addLayer("ab", {
         11: {
             title: "Light Tachyons",
             display() {
-                return hasMilestone('kou', 3) ? (player.light.auto ? "On" : "Off") : "Locked"
+                if (hasUpgrade('lab', 164)) {
+                    //if (player['awaken'].current == 'light') return "Force off";
+                    //else if (player['awaken'].current != 'dark') return "Force on";
+                    return "Force On";
+                }
+                return hasAchievement('a', 34) ? (player.light.auto ? "On" : "Off") : "Locked"
             },
-            unlocked() { return tmp["light"].layerShown && player.kou.unlocked },
-            canClick() { return hasMilestone('kou', 3) },
+            unlocked() { return tmp["light"].layerShown && hasAchievement('a', 34) },
+            canClick() { return (hasAchievement('a', 34) && !hasUpgrade('lab', 164)) /*|| (player['awaken'].current == 'dark' && player['awaken'].awakened.includes('light'))*/ },
             onClick() { player.light.auto = !player.light.auto },
             style: { "background-color"() { return player.light.auto ? "#ededed" : "#666666" } },
         },
         12: {
             title: "Dark Matters",
             display() {
-                return hasMilestone('lethe', 3) ? (player.dark.auto ? "On" : "Off") : "Locked"
+                if (hasUpgrade('lab', 164)) {
+                    //if (player['awaken'].current == 'dark') return "Force off";
+                    //else if (player['awaken'].current != 'light') return "Force on";
+                    return "Force On";
+                }
+                return hasAchievement('a', 34) ? (player.dark.auto ? "On" : "Off") : "Locked"
             },
-            unlocked() { return tmp["dark"].layerShown && player.lethe.unlocked },
-            canClick() { return hasMilestone('lethe', 3) },
+            unlocked() { return tmp["dark"].layerShown && hasAchievement('a', 34) },
+            canClick() { return (hasAchievement('a', 34) && !hasUpgrade('lab', 164)) /*|| (player['awaken'].current == 'light' && player['awaken'].awakened.includes('dark'))*/ },
             onClick() { player.dark.auto = !player.dark.auto },
             style: { "background-color"() { return player.dark.auto ? "#383838" : "#666666" } },
         },
         13: {
             title: "Red Dolls",
             display() {
-                return hasUpgrade('lab', 71) ? (player.kou.auto ? "On" : "Off") : "Locked"
+                if (hasUpgrade('lab', 164)) {
+                    //if (player['awaken'].current == 'kou') return "Force off";
+                    //else if (player['awaken'].current != 'lethe') return "Force on";
+                    return "Force On";
+                }
+                return (hasUpgrade('lab', 71)) ? (player.kou.auto ? "On" : "Off") : "Locked"
             },
-            unlocked() { return tmp["kou"].layerShown && hasAchievement('lab', 21) },
-            canClick() { return hasUpgrade('lab', 71) },
-            onClick() { player.kou.auto = !player.kou.auto },
-            style: { "background-color"() { return player.kou.auto ? "#ffa0be" : "#666666" } },
-        },
-        13: {
-            title: "Red Dolls",
-            display() {
-                return hasUpgrade('lab', 71) ? (player.kou.auto ? "On" : "Off") : "Locked"
-            },
-            unlocked() { return tmp["kou"].layerShown && hasAchievement('lab', 21) },
-            canClick() { return hasUpgrade('lab', 71) },
+            unlocked() { return tmp["kou"].layerShown && hasUpgrade('lab', 63) && hasUpgrade('lab', 64) },
+            canClick() { return hasUpgrade('lab', 71) && !hasUpgrade('lab', 164) },
             onClick() { player.kou.auto = !player.kou.auto },
             style: { "background-color"() { return player.kou.auto ? "#ffa0be" : "#666666" } },
         },
@@ -317,6 +353,36 @@ addLayer("ab", {
             canClick() { return hasUpgrade('lab', 122) },
             onClick() { player.lab.generatorauto = !player.lab.generatorauto },
             style: { "background-color"() { return player.lab.generatorauto ? "#00bdf9" : "#666666" } },
+        },
+        21: {
+            title: "Luminous Churches",
+            display() {
+                return (hasMilestone('etoluna', 3)) ? (player.zero.auto ? "On" : "Off") : "Locked"
+            },
+            unlocked() { return tmp["zero"].layerShown && player.etoluna.unlocked },
+            canClick() { return hasMilestone('etoluna', 3) },
+            onClick() { player.zero.auto = !player.zero.auto },
+            style: { "background-color"() { return player.zero.auto ? "#ffe6f6" : "#666666" } },
+        },
+        22: {
+            title: "Flourish Labyrinths",
+            display() {
+                return (hasMilestone('saya', 3)) ? (player.axium.auto ? "On" : "Off") : "Locked"
+            },
+            unlocked() { return tmp["axium"].layerShown && player.saya.unlocked },
+            canClick() { return hasMilestone('saya', 3) },
+            onClick() { player.axium.auto = !player.axium.auto },
+            style: { "background-color"() { return player.axium.auto ? "#716f5e" : "#666666" } },
+        },
+        23: {
+            title: "Everflashing Knives",
+            display() {
+                return (hasMilestone('lib', 4)) ? (player.saya.auto ? "On" : "Off") : "Locked"
+            },
+            unlocked() { return tmp["saya"].layerShown && player.lib.unlocked },
+            canClick() { return hasMilestone('lib', 4) },
+            onClick() { player.saya.auto = !player.saya.auto },
+            style: { "background-color"() { return player.saya.auto ? "#16a951" : "#666666" } },
         },
     },
 })

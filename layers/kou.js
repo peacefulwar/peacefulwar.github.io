@@ -37,8 +37,9 @@ addLayer("kou", {
         if (hasUpgrade('lab', 93)) mult = mult.div(buyableEffect('lab', 31));
         if (hasMilestone('zero', 4)) mult = mult.div(tmp["zero"].challenges[11].effecttoRF);
         if (inChallenge('world', 21)) mult = mult.div(buyableEffect('axium', 11));
-        //if (hasMilestone('ins', 1)) mult = mult.div(layers.ins.insEffect().Fra().Pos());
-        //if (inChallenge('kou', 62) || hasChallenge('kou', 62)) mult = mult.div(challengeEffect('kou', 62));
+        if (inChallenge('world', 22) || hasChallenge('world', 22)) mult = mult.div(challengeEffect('world', 22));
+        if (hasMilestone('lib', 1)) mult = mult.div(layers.lib.libEffect().ayu());
+        if (hasMilestone('lib', 2)) mult = mult.div(layers.lib.libEffect().winter());
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -47,7 +48,7 @@ addLayer("kou", {
     },
     directMult() {
         let dm = new Decimal(1);
-        //if (player.saya.unlocked && !inChallenge('kou', 61)) dm = dm.times(tmp.saya.effect);
+        if (player.saya.unlocked) dm = dm.times(tmp.saya.effect);
         return dm;
     },
 
@@ -59,8 +60,11 @@ addLayer("kou", {
         if (hasUpgrade('lethe', 15)) eff = eff.times(upgradeEffect('lethe', 15));
         if (hasUpgrade('lethe', 12)) eff = eff.times(upgradeEffect('lethe', 12));
         if (hasUpgrade('lethe', 45)) eff = eff.times(upgradeEffect('lethe', 45));
+        if (challengeCompletions('saya', 31) /*&& !layers['saya'].deactivated()*/) eff = eff.times(challengeEffect('saya', 31));
+        if (hasUpgrade('lab', 164)) eff = eff.times(buyableEffect('lab', 31).div(10).max(1));
         
-        if (player.world.randomChallenge && !hasUpgrade('story', 13)) eff = eff.pow(Math.random())
+        if (player.world.randomChallenge && !hasUpgrade('storylayer', 13)) eff = eff.pow(Math.random());
+        if (inChallenge('saya', 31) || tmp['saya'].grid.ChallengeDepth[1]>-1) eff = eff.pow(layers.saya.challenges[21].debuff());
         return eff;
     },
     effectDescription() {
@@ -179,7 +183,9 @@ addLayer("kou", {
                 if (player.zero.unlocked) maximum += 10;
                 if (player.axium.unlocked) maximum += 10;
                 if (player.world.unlocked) maximum += 10;
-                if (player.story.unlocked) maximum += 10;
+                if (player.storylayer.unlocked) maximum += 10;
+                if (player.etoluna.unlocked) maximum += 10;
+                if (player.saya.unlocked) maximum += 10;
                 return player.kou.buyables[this.id].gte(maximum)
             },
             title: "The Tower",
